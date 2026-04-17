@@ -1,3 +1,8 @@
+// Portions of this file are derived from clawd-on-desk
+// (https://github.com/rullerzhou-afk/clawd-on-desk)
+// Copyright (c) rullerzhou-afk, licensed under the MIT License.
+// See NOTICE file in the project root for full license text.
+
 const fs = require("fs");
 const http = require("http");
 const os = require("os");
