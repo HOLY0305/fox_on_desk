@@ -38,6 +38,27 @@
   let reactTimer: ReturnType<typeof setTimeout> | null = null;
   let snapPreview = $state(false);
   let opacity = $state(1);
+  let badgeSessions: { id: string; state: string; agent: string }[] = $state([]);
+
+  function badgeColor(state: string): string {
+    switch (state) {
+      case 'working':
+      case 'thinking':
+        return '#ef4444'; // red
+      case 'idle':
+      case 'attention':
+        return '#22c55e'; // green
+      case 'juggling':
+      case 'conducting':
+        return '#3b82f6'; // blue
+      case 'sleeping':
+        return '#6b7280'; // gray
+      case 'error':
+        return '#f97316'; // orange
+      default:
+        return '#a78bfa'; // purple (unknown)
+    }
+  }
 
   function movePupils(dx: number, dy: number) {
     // Eyes follow cursor (larger movement)
@@ -99,6 +120,10 @@
         snapPreview = payload.active;
       }));
 
+      unlisten.push(await listen<{ sessions: { id: string; state: string; agent: string }[] }>('sessions-badge', ({ payload }) => {
+        badgeSessions = payload.sessions;
+      }));
+
       unlisten.push(await listen('trigger-yawn', () => { invoke('trigger_sleep_sequence'); }));
       unlisten.push(await listen('trigger-wake', () => { invoke('trigger_wake'); }));
       unlisten.push(await listen('mini-peek-in', () => { invoke('mini_peek_in'); }));
@@ -122,6 +147,17 @@
   <div class="svg-wrapper" style:transform={flipped ? 'scaleX(-1)' : ''}>
     {@html svgContent}
   </div>
+  {#if badgeSessions.length > 0}
+    <div class="badge-container">
+      {#each badgeSessions as session (session.id)}
+        <div
+          class="badge-dot"
+          style:background-color={badgeColor(session.state)}
+          title={`${session.agent}: ${session.state}`}
+        ></div>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -156,5 +192,26 @@
   .svg-wrapper :global(#body-js),
   .svg-wrapper :global(#shadow-js) {
     transition: transform 80ms ease-out;
+  }
+  /* Session status badge dots */
+  .badge-container {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    display: flex;
+    gap: 3px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    animation: badge-pulse 2s ease-in-out infinite;
+  }
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 </style>

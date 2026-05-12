@@ -1125,6 +1125,26 @@ pub(crate) fn emit_state(app: &AppHandle, state_str: &str, svg: &str) {
         "state-change",
         serde_json::json!({ "state": out_state, "svg": out_svg, "flip": flip }),
     );
+
+    // Also emit session badge data
+    emit_sessions_badge(app);
+}
+
+/// Emit session status data for the badge overlay.
+fn emit_sessions_badge(app: &AppHandle) {
+    let Some(state) = app.try_state::<SharedState>() else { return };
+    let summaries = state.lock_or_recover().session_summaries();
+    let badges: Vec<serde_json::Value> = summaries
+        .iter()
+        .map(|s| {
+            serde_json::json!({
+                "id": s.id,
+                "state": s.state,
+                "agent": s.agent_id,
+            })
+        })
+        .collect();
+    let _ = app.emit("sessions-badge", serde_json::json!({ "sessions": badges }));
 }
 
 fn state_for_current_display(app: &AppHandle, state_str: &str, svg: &str) -> (String, String) {
