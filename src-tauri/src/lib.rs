@@ -542,12 +542,13 @@ fn hit_double_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHan
         if let Some(path) = folder {
             let path_str = path.to_string();
             println!("Clyde: launching Claude Code in {path_str}");
-            let _ = std::process::Command::new("powershell")
-                .args([
-                    "-NoExit",
-                    "-Command",
-                    &format!("Set-Location '{}'; claude", path_str.replace('\'', "''")),
-                ])
+            // Use cmd /c start to open a new PowerShell window
+            let ps_cmd = format!(
+                "Set-Location '{}'; claude",
+                path_str.replace('\'', "''")
+            );
+            let _ = std::process::Command::new("cmd")
+                .args(["/c", "start", "powershell", "-NoExit", "-Command", &ps_cmd])
                 .spawn();
         }
     });

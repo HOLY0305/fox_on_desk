@@ -740,7 +740,9 @@
     --accent: #d8a56c;
     --accent-strong: #f2c48f;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 80vh;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 28%),
       linear-gradient(160deg, var(--surface-top), var(--surface-bottom));
@@ -1194,5 +1196,19 @@
   .textarea:focus-visible {
     outline: 2px solid rgba(216, 165, 108, 0.72);
     outline-offset: 2px;
+  }
+  /* Custom scrollbar for overflow content */
+  .bubble::-webkit-scrollbar {
+    width: 5px;
+  }
+  .bubble::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .bubble::-webkit-scrollbar-thumb {
+    background: rgba(216, 165, 108, 0.25);
+    border-radius: 3px;
+  }
+  .bubble::-webkit-scrollbar-thumb:hover {
+    background: rgba(216, 165, 108, 0.4);
   }
 </style>

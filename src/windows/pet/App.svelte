@@ -150,11 +150,13 @@
   {#if badgeSessions.length > 0}
     <div class="badge-container">
       {#each badgeSessions as session (session.id)}
-        <div
-          class="badge-dot"
-          style:background-color={badgeColor(session.state)}
-          title={`${session.agent}: ${session.state}`}
-        ></div>
+        <div class="badge-item">
+          <div
+            class="badge-dot"
+            style:background-color={badgeColor(session.state)}
+          ></div>
+          <span class="badge-tooltip">{session.agent}: {session.state}</span>
+        </div>
       {/each}
     </div>
   {/if}
@@ -193,22 +195,50 @@
   .svg-wrapper :global(#shadow-js) {
     transition: transform 80ms ease-out;
   }
-  /* Session status badge dots */
+  /* Session status badge dots — positioned left of pet, vertical */
   .badge-container {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
     display: flex;
-    gap: 3px;
+    flex-direction: column;
+    gap: 4px;
     z-index: 10;
-    pointer-events: none;
+  }
+  .badge-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    pointer-events: auto;
+    cursor: default;
   }
   .badge-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     border: 1px solid rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
     animation: badge-pulse 2s ease-in-out infinite;
+  }
+  .badge-tooltip {
+    display: none;
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(20, 22, 30, 0.95);
+    color: #e8dccd;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    z-index: 20;
+  }
+  .badge-item:hover .badge-tooltip {
+    display: block;
   }
   @keyframes badge-pulse {
     0%, 100% { opacity: 1; }
