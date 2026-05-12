@@ -23,6 +23,10 @@ anyhow = "1"
 dirs = "5"
 open = "5"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+rodio = { version = "0.17", default-features = false, features = ["symphonia"] }
+# Ensure symphonia's vorbis codec is compiled in (rodio's symphonia feature
+# doesn't enable all codecs by default)
+symphonia = { version = "0.5", features = ["vorbis"] }
 
 
 [target.'cfg(windows)'.dependencies]

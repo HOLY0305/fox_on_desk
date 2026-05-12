@@ -12,6 +12,7 @@ mod permission_mode;
 mod macos_spaces;
 mod prefs;
 mod session_meta;
+mod sfx;
 mod state_machine;
 mod tick;
 mod tray;
@@ -562,6 +563,7 @@ fn show_context_menu(
     app: AppHandle,
     state: tauri::State<'_, SharedState>,
     prefs: tauri::State<SharedPrefs>,
+    sfx: tauri::State<'_, sfx::SharedSfx>,
 ) {
     use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 
@@ -581,6 +583,7 @@ fn show_context_menu(
         )
     };
     let is_dnd = state.lock_or_recover().dnd;
+    let is_sound = sfx::is_enabled(&sfx);
     let environment_controls_supported = environment::controls_supported();
 
     let mut items: Vec<Box<dyn tauri::menu::IsMenuItem<tauri::Wry>>> = Vec::new();
@@ -737,6 +740,16 @@ fn show_context_menu(
     };
     if let Ok(dnd) = MenuItem::with_id(&app, "ctx-dnd", &dnd_label, true, None::<&str>) {
         items.push(Box::new(dnd));
+    }
+
+    // Sound
+    let sound_label = if is_sound {
+        format!("✓ {}", i18n::t("sound", &lang))
+    } else {
+        i18n::t("sound", &lang)
+    };
+    if let Ok(s) = MenuItem::with_id(&app, "ctx-sound", &sound_label, true, None::<&str>) {
+        items.push(Box::new(s));
     }
 
     let autostart_label = if autostart {
@@ -969,6 +982,10 @@ pub(crate) fn do_toggle_dnd(app: &AppHandle, state: &SharedState) {
         sm.toggle_manual_dnd();
         sm.dnd
     };
+    // DND mutes sound effects
+    if let Some(sfx) = app.try_state::<sfx::SharedSfx>() {
+        sfx::set_enabled(&sfx, !new_dnd);
+    }
     let _ = app.emit("dnd-change", serde_json::json!({ "enabled": new_dnd }));
 }
 
@@ -1033,6 +1050,16 @@ pub(crate) fn set_auto_hidden(app: &AppHandle, state: &SharedState, enabled: boo
 #[tauri::command]
 fn toggle_dnd(app: AppHandle, state: tauri::State<'_, SharedState>) {
     do_toggle_dnd(&app, &state);
+}
+
+#[tauri::command]
+fn toggle_sound(sfx: tauri::State<'_, sfx::SharedSfx>) -> bool {
+    sfx::toggle(&sfx)
+}
+
+#[tauri::command]
+fn get_sound_enabled(sfx: tauri::State<'_, sfx::SharedSfx>) -> bool {
+    sfx::is_enabled(&sfx)
 }
 
 /// Hide pet + hit + bubble windows to system tray.
@@ -1581,6 +1608,12 @@ fn handle_context_menu_event(app: &AppHandle, state: &SharedState, id: &str) {
             toggle_autostart_pref(app);
             refresh_tray = true;
         }
+        "sound" => {
+            if let Some(sfx) = app.try_state::<sfx::SharedSfx>() {
+                sfx::toggle(&sfx);
+            }
+            refresh_tray = true;
+        }
         "size-s" => {
             tray::apply_size_pub(app, "S");
             refresh_tray = true;
@@ -1827,6 +1860,9 @@ pub fn run() {
     let shared_tray: tray::SharedTray = Arc::new(Mutex::new(None));
     let hidden_flag: HiddenFlag = Arc::new(Mutex::new(false));
 
+    // Initialize audio subsystem
+    let (sfx_player, sfx_bank) = sfx::init();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {}))
         .manage(drag_state)
@@ -1843,6 +1879,8 @@ pub fn run() {
         .manage(mode_tracker.clone())
         .manage(shared_tray.clone())
         .manage(hidden_flag)
+        .manage(sfx_player.clone())
+        .manage(sfx_bank.clone())
         .invoke_handler(tauri::generate_handler![
             drag_start, drag_move, drag_end, exit_mini_mode,
             hit_double_click, hit_flail, show_context_menu,
@@ -1861,6 +1899,8 @@ pub fn run() {
             focus::focus_terminal_for_session,
             open_update_url,
             dismiss_update_version,
+            toggle_sound,
+            get_sound_enabled,
         ])
         .setup(move |app| {
             let prefs = prefs::load(app.handle());
@@ -1909,6 +1949,8 @@ pub fn run() {
                 let approval_queue_clone = approval_queue.clone();
                 let bubbles_clone = bubble_map.clone();
                 let mode_clone = mode_tracker.clone();
+                let sfx_player_clone = sfx_player.clone();
+                let sfx_bank_clone = sfx_bank.clone();
                 let auto_start_enabled = prefs.auto_start_with_claude;
                 tauri::async_runtime::spawn(async move {
                     match http_server::start_server(
@@ -1918,6 +1960,8 @@ pub fn run() {
                         approval_queue_clone,
                         bubbles_clone,
                         mode_clone,
+                        sfx_player_clone,
+                        sfx_bank_clone,
                     )
                     .await
                     {

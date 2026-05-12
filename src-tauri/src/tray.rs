@@ -68,6 +68,18 @@ fn build_menu(app: &AppHandle, lang: &str) -> tauri::Result<Menu<tauri::Wry>> {
         t("dnd", lang)
     };
     let dnd = MenuItem::with_id(app, "dnd", dnd_label, true, None::<&str>)?;
+
+    let is_sound = app
+        .try_state::<crate::sfx::SharedSfx>()
+        .map(|s| s.is_enabled())
+        .unwrap_or(false);
+    let sound_label = if is_sound {
+        format!("✓ {}", t("sound", lang))
+    } else {
+        t("sound", lang)
+    };
+    let sound = MenuItem::with_id(app, "sound", sound_label, true, None::<&str>)?;
+
     let size_s = MenuItem::with_id(
         app,
         "size-s",
@@ -207,6 +219,7 @@ fn build_menu(app: &AppHandle, lang: &str) -> tauri::Result<Menu<tauri::Wry>> {
         &[
             &visibility,
             &dnd,
+            &sound,
             &mini,
             &lock_position,
             &click_through_item,
@@ -326,6 +339,12 @@ fn handle_tray_event(app: &AppHandle, id: &str) {
         "dnd" => {
             if let Some(state) = app.try_state::<SharedState>() {
                 crate::do_toggle_dnd(app, &state);
+            }
+            rebuild_current_menu(app);
+        }
+        "sound" => {
+            if let Some(sfx) = app.try_state::<crate::sfx::SharedSfx>() {
+                crate::sfx::toggle(&sfx);
             }
             rebuild_current_menu(app);
         }

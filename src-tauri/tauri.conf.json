@@ -52,7 +52,8 @@
     ],
     "resources": {
       "../assets/svg": "svg",
-      "../hooks": "hooks"
+      "../hooks": "hooks",
+      "../src-tauri/sound": "sound"
     },
     "windows": {
       "nsis": {

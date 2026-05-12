@@ -65,6 +65,8 @@ struct ServerCtx {
     app: AppHandle,
     bubble_map: permission::BubbleMap,
     mode_tracker: crate::permission_mode::ModeTracker,
+    sfx: crate::sfx::SharedSfx,
+    sfx_bank: crate::sfx::SharedSfxBank,
 }
 
 #[derive(Deserialize)]
@@ -399,6 +401,17 @@ async fn post_state(
     crate::emit_state(&ctx.app, &new_state, &new_svg);
     crate::sync_hit(&ctx.app);
 
+    // Play sound effects for relevant events
+    if event == "SessionStart" {
+        crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "session_start");
+    } else if event == "SubagentStop" {
+        crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "subagent_complete");
+    } else if new_state == "attention" {
+        crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "task_complete");
+    } else if new_state == "error" {
+        crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "error");
+    }
+
     // Update permission mode if provided
     if let Some(ref mode) = payload.permission_mode {
         use tauri::Manager;
@@ -576,6 +589,7 @@ async fn post_permission(
         update_notes: None,
         update_lang: None,
     };
+    crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "permission_request");
     let response = match queue_request_and_wait(&ctx, bubble_data).await {
         HookDecision::Permission(decision) => perm_response(&decision),
         HookDecision::Elicitation(_) => perm_response(&PermDecision::Deny),
@@ -882,6 +896,8 @@ pub async fn start_server(
     approval_queue: ApprovalQueue,
     bubble_map: permission::BubbleMap,
     mode_tracker: crate::permission_mode::ModeTracker,
+    sfx: crate::sfx::SharedSfx,
+    sfx_bank: crate::sfx::SharedSfxBank,
 ) -> Option<u16> {
     let ctx = ServerCtx {
         state,
@@ -890,6 +906,8 @@ pub async fn start_server(
         app,
         bubble_map,
         mode_tracker,
+        sfx,
+        sfx_bank,
     };
 
     let router = Router::new()
