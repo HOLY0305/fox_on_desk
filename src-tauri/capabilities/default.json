@@ -20,6 +20,7 @@
     "core:event:allow-listen",
     "core:event:allow-emit",
     "global-shortcut:allow-register",
-    "global-shortcut:allow-unregister"
+    "global-shortcut:allow-unregister",
+    "dialog:allow-open"
   ]
 }

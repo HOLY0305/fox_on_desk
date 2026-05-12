@@ -536,14 +536,21 @@ fn hit_double_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHan
         mini::do_exit_mini(&app);
         return;
     }
-    if let Some(pet) = app.get_webview_window("pet") {
-        let _ = pet.emit(
-            "play-click-reaction",
-            serde_json::json!({
-                "svg": "clyde-react-double.svg", "duration_ms": 800
-            }),
-        );
-    }
+    // Open folder picker, then launch PowerShell + Claude Code in selected directory
+    use tauri_plugin_dialog::DialogExt;
+    app.dialog().file().pick_folder(move |folder| {
+        if let Some(path) = folder {
+            let path_str = path.to_string();
+            println!("Clyde: launching Claude Code in {path_str}");
+            let _ = std::process::Command::new("powershell")
+                .args([
+                    "-NoExit",
+                    "-Command",
+                    &format!("Set-Location '{}'; claude", path_str.replace('\'', "''")),
+                ])
+                .spawn();
+        }
+    });
 }
 
 #[tauri::command]
@@ -1897,6 +1904,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {}))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .manage(drag_state)
         .manage(shared_state.clone())
         .manage(pending_perms.clone())
