@@ -589,7 +589,7 @@ fn show_context_menu(
     let mut items: Vec<Box<dyn tauri::menu::IsMenuItem<tauri::Wry>>> = Vec::new();
 
     // Size submenu (with checkmark)
-    if let (Ok(s), Ok(m), Ok(l)) = (
+    if let (Ok(s), Ok(m), Ok(l), Ok(xl)) = (
         MenuItem::with_id(
             &app,
             "ctx-size-s",
@@ -611,8 +611,15 @@ fn show_context_menu(
             true,
             None::<&str>,
         ),
+        MenuItem::with_id(
+            &app,
+            "ctx-size-xl",
+            if cur_size == "XL" { "✓ XL" } else { "XL" },
+            true,
+            None::<&str>,
+        ),
     ) {
-        if let Ok(sub) = Submenu::with_items(&app, i18n::t("size", &lang), true, &[&s, &m, &l]) {
+        if let Ok(sub) = Submenu::with_items(&app, i18n::t("size", &lang), true, &[&s, &m, &l, &xl]) {
             items.push(Box::new(sub));
         }
     }
@@ -1644,6 +1651,10 @@ fn handle_context_menu_event(app: &AppHandle, state: &SharedState, id: &str) {
         }
         "size-l" => {
             tray::apply_size_pub(app, "L");
+            refresh_tray = true;
+        }
+        "size-xl" => {
+            tray::apply_size_pub(app, "XL");
             refresh_tray = true;
         }
         "opacity-100" => {

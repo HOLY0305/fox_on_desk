@@ -76,6 +76,7 @@ pub fn size_to_pixels(size: &str) -> (u32, u32) {
     match size {
         "M" => (280, 280),
         "L" => (360, 360),
+        "XL" => (480, 480),
         _ => (200, 200),
     }
 }

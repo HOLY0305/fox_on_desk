@@ -101,7 +101,14 @@ fn build_menu(app: &AppHandle, lang: &str) -> tauri::Result<Menu<tauri::Wry>> {
         true,
         None::<&str>,
     )?;
-    let size_sub = Submenu::with_items(app, t("size", lang), true, &[&size_s, &size_m, &size_l])?;
+    let size_xl = MenuItem::with_id(
+        app,
+        "size-xl",
+        if size == "XL" { "✓ XL" } else { "XL" },
+        true,
+        None::<&str>,
+    )?;
+    let size_sub = Submenu::with_items(app, t("size", lang), true, &[&size_s, &size_m, &size_l, &size_xl])?;
 
     let mut opacity_items = Vec::new();
     for level in [100, 90, 80, 70, 60, 50, 40] {
@@ -376,10 +383,11 @@ fn handle_tray_event(app: &AppHandle, id: &str) {
             crate::toggle_auto_dnd_meetings_pref(app);
             rebuild_current_menu(app);
         }
-        "size-s" | "size-m" | "size-l" => {
+        "size-s" | "size-m" | "size-l" | "size-xl" => {
             let size_str = match id {
                 "size-m" => "M",
                 "size-l" => "L",
+                "size-xl" => "XL",
                 _ => "S",
             };
             apply_size(app, size_str);
