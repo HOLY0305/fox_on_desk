@@ -13,6 +13,7 @@ pub enum WindowKind {
     ApprovalRequest,
     ModeNotice,
     UpdateNotice,
+    ProgressNotice,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -263,6 +264,65 @@ fn get_pet_anchor(app: &AppHandle, monitor: &crate::windows::MonitorArea) -> Bub
             width: 200,
             height: 200,
         }
+    }
+}
+
+/// Show a progress notification bubble (e.g. subagent completed).
+/// Auto-dismisses after 3 seconds. Returns the bubble id.
+pub fn show_progress_bubble(
+    app: &AppHandle,
+    bubbles: &BubbleMap,
+    title: &str,
+    description: &str,
+    lang: &str,
+) -> Option<String> {
+    // Don't show in DND mode
+    if app
+        .try_state::<crate::state_machine::SharedState>()
+        .map(|s| s.lock_or_recover().dnd)
+        .unwrap_or(false)
+    {
+        return None;
+    }
+
+    let id = uuid::Uuid::new_v4().to_string();
+    let data = BubbleData {
+        id: id.clone(),
+        window_kind: WindowKind::ProgressNotice,
+        tool_name: String::new(),
+        tool_input: serde_json::Value::Null,
+        suggestions: Vec::new(),
+        session_id: String::new(),
+        agent_label: "Clyde".to_string(),
+        session_summary: title.to_string(),
+        session_project: String::new(),
+        session_short_id: String::new(),
+        is_elicitation: false,
+        elicitation_message: None,
+        elicitation_schema: None,
+        elicitation_mode: None,
+        elicitation_url: None,
+        elicitation_server_name: None,
+        mode_label: Some(format!("✓ {title}")),
+        mode_description: Some(description.to_string()),
+        update_version: None,
+        update_url: None,
+        update_notes: None,
+        update_lang: Some(lang.to_string()),
+    };
+
+    if show_bubble(app, bubbles, data) {
+        // Auto-dismiss after 3 seconds
+        let app2 = app.clone();
+        let bubbles2 = (*bubbles).clone();
+        let dismiss_id = id.clone();
+        tauri::async_runtime::spawn(async move {
+            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+            prepare_close_bubble(&app2, &bubbles2, &dismiss_id);
+        });
+        Some(id)
+    } else {
+        None
     }
 }
 

@@ -85,7 +85,7 @@
 
   let elicitationValues = $state<Record<string, unknown>>({});
 
-  const isModeNotice = $derived(windowKind === 'ModeNotice');
+  const isModeNotice = $derived(windowKind === 'ModeNotice' || windowKind === 'ProgressNotice');
   const isUpdateNotice = $derived(windowKind === 'UpdateNotice');
   const commandText = $derived(extractCommand(toolInput));
   const headerMeta = $derived([sessionProject, sessionShortId].filter(Boolean).join(' · '));
