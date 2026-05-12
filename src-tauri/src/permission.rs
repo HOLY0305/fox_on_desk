@@ -269,6 +269,7 @@ fn get_pet_anchor(app: &AppHandle, monitor: &crate::windows::MonitorArea) -> Bub
 
 /// Show a progress notification bubble (e.g. subagent completed).
 /// Auto-dismisses after 3 seconds. Returns the bubble id.
+#[allow(dead_code)]
 pub fn show_progress_bubble(
     app: &AppHandle,
     bubbles: &BubbleMap,

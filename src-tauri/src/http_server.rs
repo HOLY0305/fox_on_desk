@@ -406,25 +406,6 @@ async fn post_state(
         crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "session_start");
     } else if event == "SubagentStop" {
         crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "subagent_complete");
-        // Show progress bubble for subagent completion
-        let lang = ctx
-            .app
-            .try_state::<crate::prefs::SharedPrefs>()
-            .map(|p| p.lock_or_recover().lang.clone())
-            .unwrap_or_else(|| "en".into());
-        let label = if lang == "zh" { "子代理已完成" } else { "Subagent Completed" };
-        let desc = if lang == "zh" {
-            "子代理任务执行完毕"
-        } else {
-            "Subagent task finished"
-        };
-        crate::permission::show_progress_bubble(
-            &ctx.app,
-            &ctx.bubble_map,
-            label,
-            desc,
-            &lang,
-        );
     } else if new_state == "attention" {
         crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "task_complete");
     } else if new_state == "error" {
