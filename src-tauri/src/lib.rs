@@ -542,9 +542,11 @@ fn hit_double_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHan
         if let Some(path) = folder {
             let path_str = path.to_string();
             println!("Clyde: launching Claude Code in {path_str}");
+            let escaped_path = path_str.replace('\'', "''");
+            // Use Get-Command to resolve claude path dynamically
             let ps_cmd = format!(
-                "Set-Location '{}'; claude",
-                path_str.replace('\'', "''")
+                "Set-Location '{}'; $c = Get-Command claude -ErrorAction SilentlyContinue; if ($c) {{ & $c.Source }} else {{ Write-Host 'claude not found in PATH' }}",
+                escaped_path
             );
             // Try Windows Terminal pane first (wt -w 0 sp = split in current window)
             // Fall back to new PowerShell window if wt is not available

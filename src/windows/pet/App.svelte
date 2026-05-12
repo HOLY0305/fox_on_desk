@@ -38,28 +38,6 @@
   let reactTimer: ReturnType<typeof setTimeout> | null = null;
   let snapPreview = $state(false);
   let opacity = $state(1);
-  let badgeSessions: { id: string; state: string; agent: string; summary?: string; updated_secs_ago?: number }[] = $state([]);
-  let showBadgePanel = $state(false);
-
-  function badgeColor(state: string): string {
-    switch (state) {
-      case 'working':
-      case 'thinking':
-        return '#ef4444'; // red
-      case 'idle':
-      case 'attention':
-        return '#22c55e'; // green
-      case 'juggling':
-      case 'conducting':
-        return '#3b82f6'; // blue
-      case 'sleeping':
-        return '#6b7280'; // gray
-      case 'error':
-        return '#f97316'; // orange
-      default:
-        return '#a78bfa'; // purple (unknown)
-    }
-  }
 
   function movePupils(dx: number, dy: number) {
     // Eyes follow cursor (larger movement)
@@ -121,12 +99,6 @@
         snapPreview = payload.active;
       }));
 
-      unlisten.push(await listen<{ sessions: { id: string; state: string; agent: string; summary?: string; updated_secs_ago?: number }[] }>('sessions-badge', ({ payload }) => {
-        badgeSessions = payload.sessions;
-        // Auto-close panel if no sessions left
-        if (badgeSessions.length === 0) showBadgePanel = false;
-      }));
-
       unlisten.push(await listen('trigger-yawn', () => { invoke('trigger_sleep_sequence'); }));
       unlisten.push(await listen('trigger-wake', () => { invoke('trigger_wake'); }));
       unlisten.push(await listen('mini-peek-in', () => { invoke('mini_peek_in'); }));
@@ -150,35 +122,6 @@
   <div class="svg-wrapper" style:transform={flipped ? 'scaleX(-1)' : ''}>
     {@html svgContent}
   </div>
-  {#if badgeSessions.length > 0}
-    <div class="badge-container" onclick={() => showBadgePanel = !showBadgePanel}>
-      {#each badgeSessions as session (session.id)}
-        <div class="badge-item">
-          <div
-            class="badge-dot"
-            style:background-color={badgeColor(session.state)}
-          ></div>
-        </div>
-      {/each}
-    </div>
-    {#if showBadgePanel}
-      <div class="badge-panel">
-        <div class="badge-panel-title">Active Sessions ({badgeSessions.length})</div>
-        {#each badgeSessions as session (session.id)}
-          <div class="badge-panel-row">
-            <div class="badge-panel-dot" style:background-color={badgeColor(session.state)}></div>
-            <div class="badge-panel-info">
-              <span class="badge-panel-agent">{session.agent}</span>
-              <span class="badge-panel-state">{session.state}</span>
-              {#if session.summary}
-                <span class="badge-panel-summary">{session.summary}</span>
-              {/if}
-            </div>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  {/if}
 </div>
 
 <style>
@@ -213,96 +156,5 @@
   .svg-wrapper :global(#body-js),
   .svg-wrapper :global(#shadow-js) {
     transition: transform 80ms ease-out;
-  }
-  /* Session status badge dots — positioned left of pet, vertical */
-  .badge-container {
-    position: absolute;
-    left: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    z-index: 10;
-    cursor: pointer;
-    pointer-events: auto;
-  }
-  .badge-item {
-    display: flex;
-    align-items: center;
-  }
-  .badge-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.3);
-    flex-shrink: 0;
-    animation: badge-pulse 2s ease-in-out infinite;
-  }
-  @keyframes badge-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
-  /* Badge detail panel */
-  .badge-panel {
-    position: absolute;
-    left: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(18, 20, 28, 0.95);
-    border: 1px solid rgba(216, 165, 108, 0.2);
-    border-radius: 10px;
-    padding: 10px 12px;
-    min-width: 160px;
-    max-width: 220px;
-    z-index: 30;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-  .badge-panel-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: #bdb3a3;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
-  }
-  .badge-panel-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 4px 0;
-  }
-  .badge-panel-row + .badge-panel-row {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  .badge-panel-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-top: 4px;
-    flex-shrink: 0;
-  }
-  .badge-panel-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-  }
-  .badge-panel-agent {
-    font-size: 11px;
-    font-weight: 600;
-    color: #f0e6d7;
-  }
-  .badge-panel-state {
-    font-size: 10px;
-    color: #bdb3a3;
-  }
-  .badge-panel-summary {
-    font-size: 10px;
-    color: #9b917f;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 </style>
