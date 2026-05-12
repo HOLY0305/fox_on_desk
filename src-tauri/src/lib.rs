@@ -1896,6 +1896,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {}))
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(drag_state)
         .manage(shared_state.clone())
         .manage(pending_perms.clone())
@@ -2042,6 +2043,36 @@ pub fn run() {
             }
 
             tick::start_tick(app.handle().clone(), shared_state.clone());
+
+            // Register Alt+C global shortcut to summon pet to cursor
+            {
+                let handle1 = app.handle().clone();
+                let handle2 = app.handle().clone();
+                use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+                let shortcut = Shortcut::new(Some(Modifiers::ALT), Code::KeyC);
+                let _ = handle1.global_shortcut().on_shortcut(
+                    shortcut,
+                    move |_app, _shortcut, event| {
+                        if event.state != ShortcutState::Pressed {
+                            return;
+                        }
+                        let h = &handle2;
+                        if let Ok(pos) = h.cursor_position() {
+                            let cx = pos.x as i32;
+                            let cy = pos.y as i32;
+                            if let Some(pet) = h.get_webview_window("pet") {
+                                if let Ok(size) = pet.outer_size() {
+                                    let new_x = cx - (size.width as i32 / 2);
+                                    let new_y = cy - (size.height as i32 / 2);
+                                    let _ = pet.set_position(tauri::PhysicalPosition::new(new_x, new_y));
+                                    crate::sync_hit(h);
+                                    crate::persist_current_pet_position(h);
+                                }
+                            }
+                        }
+                    },
+                );
+            }
             codex_monitor::start_codex_monitor(app.handle().clone(), shared_state.clone());
             claude_monitor::start_claude_monitor(app.handle().clone(), shared_state.clone());
             start_cleanup_loop(app.handle(), shared_state.clone());
