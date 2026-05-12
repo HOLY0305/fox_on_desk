@@ -78,7 +78,7 @@ pub fn show_bubble(app: &AppHandle, bubbles: &BubbleMap, data: BubbleData) -> bo
 
     let mut builder = WebviewWindowBuilder::new(app, &label, WebviewUrl::App(url.into()))
         .title("")
-        .inner_size(BUBBLE_WIDTH as f64, 500.0)
+        .inner_size(BUBBLE_WIDTH as f64, 700.0)
         .position(x_log, y_log)
         .decorations(false)
         .always_on_top(true)
@@ -100,7 +100,7 @@ pub fn show_bubble(app: &AppHandle, bubbles: &BubbleMap, data: BubbleData) -> bo
             crate::macos_spaces::apply_space_follow(&window);
             let _ = window.set_shadow(false);
             let _ = window.set_background_color(Some(Color(0, 0, 0, 0)));
-            let phys_placeholder = (500.0 * scale).round() as u32;
+            let phys_placeholder = (700.0 * scale).round() as u32;
             bubbles.lock_or_recover().insert(
                 id,
                 BubbleEntry {
@@ -565,7 +565,7 @@ pub fn bubble_height_measured(
     if let Some(window) = app.get_webview_window(&format!("bubble-{id}")) {
         let _ = window.set_size(Size::Logical(LogicalSize::new(
             BUBBLE_WIDTH as f64,
-            height.max(400) as f64,
+            height.max(500) as f64,
         )));
     }
     reposition_bubbles(&app, &bubbles);
