@@ -506,7 +506,7 @@
     </div>
   </div>
 {:else}
-  <div class="bubble">
+  <div class="bubble bubble-flex">
     <div class="glow"></div>
     <div class="header bubble-drag-handle">
       <div class="header-copy">
@@ -523,6 +523,7 @@
       <span class="badge">{badge}</span>
     </div>
 
+    <div class="bubble-scroll-area">
     <div class="intent">
       <div class="intent-title">{requestTitle()}</div>
       <div class="intent-copy">
@@ -663,7 +664,9 @@
           </span>
         </div>
       {/if}
+      </div><!-- /bubble-scroll-area -->
 
+      {#if isElicitation}
       <div class="actions actions-wrap">
         {#if !singleChoiceField && elicitationFields.length > 0}
           <button
@@ -697,7 +700,7 @@
           <small>Close without answering</small>
         </button>
       </div>
-    {:else}
+      {:else}
       <div class="actions">
         <button class="btn btn-primary btn-stacked" onclick={allow} aria-label="Allow this request once">
           <span>Allow Once</span>
@@ -740,9 +743,7 @@
     --accent: #d8a56c;
     --accent-strong: #f2c48f;
     position: relative;
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: 80vh;
+    overflow: hidden;
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0) 28%),
       linear-gradient(160deg, var(--surface-top), var(--surface-bottom));
@@ -756,6 +757,17 @@
     box-shadow:
       0 22px 44px var(--surface-shadow),
       0 0 0 1px rgba(0, 0, 0, 0.24);
+  }
+  .bubble-flex {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+  }
+  .bubble-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
   }
 
   .glow {

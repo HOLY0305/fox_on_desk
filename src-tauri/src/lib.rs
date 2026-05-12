@@ -536,20 +536,26 @@ fn hit_double_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHan
         mini::do_exit_mini(&app);
         return;
     }
-    // Open folder picker, then launch PowerShell + Claude Code in selected directory
+    // Open folder picker, then launch Claude Code in a terminal pane
     use tauri_plugin_dialog::DialogExt;
     app.dialog().file().pick_folder(move |folder| {
         if let Some(path) = folder {
             let path_str = path.to_string();
             println!("Clyde: launching Claude Code in {path_str}");
-            // Use cmd /c start to open a new PowerShell window
             let ps_cmd = format!(
                 "Set-Location '{}'; claude",
                 path_str.replace('\'', "''")
             );
-            let _ = std::process::Command::new("cmd")
-                .args(["/c", "start", "powershell", "-NoExit", "-Command", &ps_cmd])
+            // Try Windows Terminal pane first (wt -w 0 sp = split in current window)
+            // Fall back to new PowerShell window if wt is not available
+            let result = std::process::Command::new("wt")
+                .args(["-w", "0", "sp", "powershell", "-NoExit", "-Command", &ps_cmd])
                 .spawn();
+            if result.is_err() {
+                let _ = std::process::Command::new("cmd")
+                    .args(["/c", "start", "powershell", "-NoExit", "-Command", &ps_cmd])
+                    .spawn();
+            }
         }
     });
 }
@@ -1149,13 +1155,17 @@ pub(crate) fn emit_state(app: &AppHandle, state_str: &str, svg: &str) {
 fn emit_sessions_badge(app: &AppHandle) {
     let Some(state) = app.try_state::<SharedState>() else { return };
     let summaries = state.lock_or_recover().session_summaries();
+    // Filter out monitor-created sessions (they duplicate real hook sessions)
     let badges: Vec<serde_json::Value> = summaries
         .iter()
+        .filter(|s| !s.id.starts_with("claude-monitor-"))
         .map(|s| {
             serde_json::json!({
                 "id": s.id,
                 "state": s.state,
                 "agent": s.agent_id,
+                "summary": s.summary,
+                "updated_secs_ago": s.updated_secs_ago,
             })
         })
         .collect();
