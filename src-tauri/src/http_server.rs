@@ -566,6 +566,13 @@ async fn post_permission(
 
     // Detect AskUserQuestion tool — extract questions/options as suggestions
     let is_ask_user = tool_name == "AskUserQuestion";
+    let ask_questions: Option<Value> = if is_ask_user && suggestions.is_empty() {
+        tool_input.get("questions").and_then(|q| q.as_array()).map(|_| {
+            tool_input.get("questions").cloned().unwrap_or(json!([]))
+        })
+    } else {
+        None
+    };
     if is_ask_user && suggestions.is_empty() {
         if let Some(questions) = tool_input.get("questions").and_then(|q| q.as_array()) {
             if let Some(first) = questions.first() {
@@ -577,6 +584,7 @@ async fn post_permission(
                                 "type": "askUserChoice",
                                 "label": label,
                                 "question": question,
+                                "_questions": ask_questions,
                             }));
                         }
                     }
@@ -1030,13 +1038,20 @@ pub fn resolve_permission(
             }
         } else {
             match (decision.as_str(), selected_suggestion) {
-                ("allow", Some(sug)) => {
+                        ("allow", Some(sug)) => {
                     // Check if this is an AskUserQuestion choice
                     if sug.get("type").and_then(|t| t.as_str()) == Some("askUserChoice") {
                         let question = sug.get("question").and_then(|q| q.as_str()).unwrap_or("");
                         let label = sug.get("label").and_then(|l| l.as_str()).unwrap_or("");
-                        let answers = json!({ question: label });
-                        HookDecision::Permission(PermDecision::AllowWithAnswer(answers))
+                        // Pass through original questions + answers — updatedInput replaces entire tool_input
+                        let questions = sug.get("_questions").cloned().unwrap_or_else(|| {
+                            json!([{ "question": question, "options": [{"label": label}], "multiSelect": false }])
+                        });
+                        let updated = json!({
+                            "questions": questions,
+                            "answers": { question: label }
+                        });
+                        HookDecision::Permission(PermDecision::AllowWithAnswer(updated))
                     } else {
                         HookDecision::Permission(PermDecision::AllowWithPermissions(vec![sug]))
                     }
