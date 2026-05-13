@@ -543,19 +543,23 @@ fn hit_double_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHan
             let path_str = path.to_string();
             println!("Clyde: launching Claude Code in {path_str}");
             let escaped_path = path_str.replace('\'', "''");
-            // Use Get-Command to resolve claude path dynamically
-            let ps_cmd = format!(
-                "Set-Location '{}'; $c = Get-Command claude -ErrorAction SilentlyContinue; if ($c) {{ & $c.Source }} else {{ Write-Host 'claude not found in PATH' }}",
+            // Write a temp script to avoid wt argument parsing issues
+            let script = format!(
+                "Set-Location '{}'\ntry {{ $c = (Get-Command claude -ErrorAction Stop).Source; & $c }} catch {{ Write-Host 'claude not found'; pause }}",
                 escaped_path
             );
-            // Try Windows Terminal pane first (wt -w 0 sp = split in current window)
-            // Fall back to new PowerShell window if wt is not available
-            let result = std::process::Command::new("wt")
-                .args(["-w", "0", "sp", "powershell", "-NoExit", "-Command", &ps_cmd])
-                .spawn();
-            if result.is_err() {
-                let _ = std::process::Command::new("cmd")
-                    .args(["/c", "start", "powershell", "-NoExit", "-Command", &ps_cmd])
+            let script_path = std::env::temp_dir().join("clyde_launch.ps1");
+            let _ = std::fs::write(&script_path, &script);
+            let script_arg = script_path.display().to_string();
+            // Try Windows Terminal pane first
+            let pane_ok = std::process::Command::new("wt")
+                .args(["-w", "0", "sp", "--", "powershell", "-NoExit", "-ExecutionPolicy", "Bypass", "-File", &script_arg])
+                .spawn()
+                .is_ok();
+            if !pane_ok {
+                // Fallback: new window
+                let _ = std::process::Command::new("powershell")
+                    .args(["-NoExit", "-ExecutionPolicy", "Bypass", "-File", &script_arg])
                     .spawn();
             }
         }
@@ -791,7 +795,8 @@ fn show_context_menu(
 
     // Sessions submenu
     let sessions = state.lock_or_recover().session_summaries();
-    let session_label = format!("{} ({})", i18n::t("sessions", &lang), sessions.len());
+    let session_count = sessions.iter().filter(|s| !s.id.starts_with("claude-monitor-")).count();
+    let session_label = format!("{} ({})", i18n::t("sessions", &lang), session_count);
     let mut session_items: Vec<Box<dyn tauri::menu::IsMenuItem<tauri::Wry>>> = Vec::new();
     if sessions.is_empty() {
         if let Ok(no) = MenuItem::with_id(

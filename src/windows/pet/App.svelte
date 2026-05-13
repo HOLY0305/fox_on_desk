@@ -38,6 +38,18 @@
   let reactTimer: ReturnType<typeof setTimeout> | null = null;
   let snapPreview = $state(false);
   let opacity = $state(1);
+  let badgeSessions: { id: string; state: string }[] = $state([]);
+
+  function badgeColor(state: string): string {
+    switch (state) {
+      case 'working': case 'thinking': return '#ef4444';
+      case 'idle': case 'attention': return '#22c55e';
+      case 'juggling': case 'conducting': return '#3b82f6';
+      case 'sleeping': return '#6b7280';
+      case 'error': return '#f97316';
+      default: return '#a78bfa';
+    }
+  }
 
   function movePupils(dx: number, dy: number) {
     // Eyes follow cursor (larger movement)
@@ -99,6 +111,10 @@
         snapPreview = payload.active;
       }));
 
+      unlisten.push(await listen<{ sessions: { id: string; state: string }[] }>('sessions-badge', ({ payload }) => {
+        badgeSessions = (payload.sessions || []).filter((s) => !s.id.startsWith('claude-monitor-'));
+      }));
+
       unlisten.push(await listen('trigger-yawn', () => { invoke('trigger_sleep_sequence'); }));
       unlisten.push(await listen('trigger-wake', () => { invoke('trigger_wake'); }));
       unlisten.push(await listen('mini-peek-in', () => { invoke('mini_peek_in'); }));
@@ -122,6 +138,13 @@
   <div class="svg-wrapper" style:transform={flipped ? 'scaleX(-1)' : ''}>
     {@html svgContent}
   </div>
+  {#if badgeSessions.length > 0}
+    <div class="badge-dots">
+      {#each badgeSessions as session (session.id)}
+        <div class="badge-dot" style:background-color={badgeColor(session.state)}></div>
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -156,5 +179,28 @@
   .svg-wrapper :global(#body-js),
   .svg-wrapper :global(#shadow-js) {
     transition: transform 80ms ease-out;
+  }
+  /* Badge dots — visual only, no pointer events */
+  .badge-dots {
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    animation: badge-pulse 2s ease-in-out infinite;
+  }
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 </style>

@@ -63,8 +63,8 @@ pub fn state_priority(s: &str) -> u8 {
 }
 
 pub const ONESHOT_STATES: &[&str] = &["attention", "error", "notification", "sweeping", "carrying"];
-const SESSION_STALE_SECS: u64 = 600;
-const WORKING_STALE_SECS: u64 = 300;
+const SESSION_STALE_SECS: u64 = 600;  // 10 minutes
+const WORKING_STALE_SECS: u64 = 300; // 5 minutes
 
 pub struct StateMachine {
     pub current_state: String,
@@ -171,10 +171,18 @@ impl StateMachine {
         let mut changed = false;
         let ids: Vec<String> = self.sessions.keys().cloned().collect();
         for id in ids {
-            let age = {
+            let (age, pid) = {
                 let s = &self.sessions[&id];
-                now.duration_since(s.updated_at).as_secs()
+                (now.duration_since(s.updated_at).as_secs(), s.source_pid)
             };
+            // Remove sessions whose process is no longer running (only after 30s grace)
+            if let Some(pid) = pid {
+                if age > 30 && !is_process_alive(pid) {
+                    self.sessions.remove(&id);
+                    changed = true;
+                    continue;
+                }
+            }
             if age > SESSION_STALE_SECS {
                 self.sessions.remove(&id);
                 changed = true;
@@ -262,6 +270,30 @@ impl StateMachine {
             "mini-sleep" => "clyde-mini-sleep.svg".into(),
             _ => "clyde-idle-follow.svg".into(),
         }
+    }
+}
+
+/// Check if a process is still running by PID.
+fn is_process_alive(pid: u32) -> bool {
+    #[cfg(target_os = "windows")]
+    {
+        use windows::Win32::System::Threading::{OpenProcess, PROCESS_QUERY_LIMITED_INFORMATION};
+        use windows::Win32::Foundation::CloseHandle;
+        unsafe {
+            let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+            match handle {
+                Ok(h) => {
+                    let _ = CloseHandle(h);
+                    true
+                }
+                Err(_) => false,
+            }
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        // On Unix, sending signal 0 checks if process exists
+        unsafe { libc::kill(pid as i32, 0) == 0 }
     }
 }
 
