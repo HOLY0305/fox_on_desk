@@ -404,6 +404,14 @@
       (obj.tool_name as string | undefined) ??
       toolName;
 
+    // If suggestion has a label (extracted from options/choices), use it directly
+    if (typeof obj.label === 'string' && obj.label) {
+      return {
+        title: obj.label,
+        subtitle: obj.description ? String(obj.description) : 'Select this option',
+      };
+    }
+
     if (type === 'addRules' && obj.behavior === 'allow') {
       const rule = typeof obj.ruleContent === 'string' ? obj.ruleContent : '';
       return {

@@ -555,13 +555,45 @@ async fn post_permission(
     let tool_input = payload_value(&payload, &["tool_input", "toolInput"])
         .cloned()
         .unwrap_or_else(|| json!({}));
-    let suggestions = payload_value(
+    let mut suggestions = payload_value(
         &payload,
         &["permission_suggestions", "permissionSuggestions"],
     )
     .and_then(|value| value.as_array())
     .cloned()
     .unwrap_or_default();
+
+    // If no suggestions found, check for embedded options/choices in the payload
+    // (Claude Code may send choice prompts as PermissionRequest without suggestions)
+    if suggestions.is_empty() {
+        if let Some(opts) = payload_value_nested(&payload, &["options", "choices", "items"])
+            .and_then(|v| v.as_array())
+        {
+            for opt in opts {
+                if let Some(label) = opt.get("label").and_then(|v| v.as_str()) {
+                    let value = opt.get("value").cloned().unwrap_or_else(|| json!(label));
+                    suggestions.push(json!({
+                        "type": "addRules",
+                        "behavior": "allow",
+                        "toolName": tool_name,
+                        "label": label,
+                        "value": value,
+                    }));
+                } else if let Some(text) = opt.as_str() {
+                    suggestions.push(json!({
+                        "type": "addRules",
+                        "behavior": "allow",
+                        "toolName": tool_name,
+                        "label": text,
+                        "value": text,
+                    }));
+                }
+            }
+        }
+    }
+
+    eprintln!("Clyde: /permission tool={} suggestions={}", tool_name, suggestions.len());
+
     let display = extract_request_display_meta(&ctx, &payload, &tool_input, "claude-code");
     let entry_id = uuid::Uuid::new_v4().to_string();
 
