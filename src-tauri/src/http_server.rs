@@ -35,6 +35,7 @@ pub enum PermDecision {
     Allow,
     Deny,
     AllowWithPermissions(Vec<serde_json::Value>),
+    AllowWithAnswer(serde_json::Value),
 }
 
 #[derive(Debug, Clone)]
@@ -563,36 +564,46 @@ async fn post_permission(
     .cloned()
     .unwrap_or_default();
 
-    // If no suggestions found, check for embedded options/choices in the payload
-    // (Claude Code may send choice prompts as PermissionRequest without suggestions)
+    // Detect AskUserQuestion tool — extract questions/options as suggestions
+    let is_ask_user = tool_name == "AskUserQuestion";
+    if is_ask_user && suggestions.is_empty() {
+        if let Some(questions) = tool_input.get("questions").and_then(|q| q.as_array()) {
+            if let Some(first) = questions.first() {
+                let question = first.get("question").and_then(|q| q.as_str()).map(|s| s.to_string());
+                if let Some(opts) = first.get("options").and_then(|o| o.as_array()) {
+                    for opt in opts {
+                        if let Some(label) = opt.get("label").and_then(|v| v.as_str()) {
+                            suggestions.push(json!({
+                                "type": "askUserChoice",
+                                "label": label,
+                                "question": question,
+                            }));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Fallback: check for embedded options in payload
     if suggestions.is_empty() {
         if let Some(opts) = payload_value_nested(&payload, &["options", "choices", "items"])
             .and_then(|v| v.as_array())
         {
             for opt in opts {
                 if let Some(label) = opt.get("label").and_then(|v| v.as_str()) {
-                    let value = opt.get("value").cloned().unwrap_or_else(|| json!(label));
                     suggestions.push(json!({
                         "type": "addRules",
                         "behavior": "allow",
                         "toolName": tool_name,
                         "label": label,
-                        "value": value,
-                    }));
-                } else if let Some(text) = opt.as_str() {
-                    suggestions.push(json!({
-                        "type": "addRules",
-                        "behavior": "allow",
-                        "toolName": tool_name,
-                        "label": text,
-                        "value": text,
                     }));
                 }
             }
         }
     }
 
-    eprintln!("Clyde: /permission tool={} suggestions={}", tool_name, suggestions.len());
+    eprintln!("Clyde: /permission tool={} suggestions={} ask={}", tool_name, suggestions.len(), is_ask_user);
 
     let display = extract_request_display_meta(&ctx, &payload, &tool_input, "claude-code");
     let entry_id = uuid::Uuid::new_v4().to_string();
@@ -894,6 +905,12 @@ fn perm_response(decision: &PermDecision) -> Value {
             "behavior": "allow",
             "updatedPermissions": perms
         }),
+        PermDecision::AllowWithAnswer(answers) => json!({
+            "behavior": "allow",
+            "updatedInput": {
+                "answers": answers
+            }
+        }),
     };
     json!({
         "hookSpecificOutput": {
@@ -1014,7 +1031,15 @@ pub fn resolve_permission(
         } else {
             match (decision.as_str(), selected_suggestion) {
                 ("allow", Some(sug)) => {
-                    HookDecision::Permission(PermDecision::AllowWithPermissions(vec![sug]))
+                    // Check if this is an AskUserQuestion choice
+                    if sug.get("type").and_then(|t| t.as_str()) == Some("askUserChoice") {
+                        let question = sug.get("question").and_then(|q| q.as_str()).unwrap_or("");
+                        let label = sug.get("label").and_then(|l| l.as_str()).unwrap_or("");
+                        let answers = json!({ question: label });
+                        HookDecision::Permission(PermDecision::AllowWithAnswer(answers))
+                    } else {
+                        HookDecision::Permission(PermDecision::AllowWithPermissions(vec![sug]))
+                    }
                 }
                 ("allow", None) => HookDecision::Permission(PermDecision::Allow),
                 _ => HookDecision::Permission(PermDecision::Deny),

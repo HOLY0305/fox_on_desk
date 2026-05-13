@@ -346,6 +346,7 @@
 
   function requestTitle(): string {
     if (isElicitation) return `${agentLabel} needs a reply`;
+    if (toolName === 'AskUserQuestion') return `${agentLabel} asks:`;
     if (toolName === 'Bash' && commandText) return `Allow ${agentLabel} to run this command?`;
     return `Allow ${agentLabel} to use ${toolName || 'this tool'}?`;
   }
@@ -403,6 +404,14 @@
       (obj.toolName as string | undefined) ??
       (obj.tool_name as string | undefined) ??
       toolName;
+
+    // AskUserQuestion choices
+    if (type === 'askUserChoice' && typeof obj.label === 'string') {
+      return {
+        title: obj.label,
+        subtitle: obj.question ? String(obj.question) : 'Select this option',
+      };
+    }
 
     // If suggestion has a label (extracted from options/choices), use it directly
     if (typeof obj.label === 'string' && obj.label) {
@@ -536,6 +545,8 @@
       <div class="intent-copy">
         {#if isElicitation}
           Choose a reply here or jump back to the terminal session.
+        {:else if toolName === 'AskUserQuestion'}
+          Select your answer below.
         {:else}
           This only affects the current request.
         {/if}
