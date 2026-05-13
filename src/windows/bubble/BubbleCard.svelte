@@ -40,7 +40,7 @@
     windowKind = 'ApprovalRequest',
     toolName = '',
     toolInput = {},
-    suggestions = [],
+    suggestions: rawSuggestions = [],
     sessionId,
     agentLabel = 'Claude',
     sessionSummary = '',
@@ -85,6 +85,7 @@
 
   let elicitationValues = $state<Record<string, unknown>>({});
 
+  const suggestions = $derived(Array.isArray(rawSuggestions) ? rawSuggestions : []);
   const isModeNotice = $derived(windowKind === 'ModeNotice' || windowKind === 'ProgressNotice');
   const isUpdateNotice = $derived(windowKind === 'UpdateNotice');
   const commandText = $derived(extractCommand(toolInput));
@@ -392,14 +393,14 @@
   }
 
   function describeSuggestion(sug: unknown): SuggestionView {
-    if (typeof sug !== 'object' || sug === null) {
+    if (!sug || typeof sug !== 'object') {
       return {
-        title: String(sug),
+        title: String(sug ?? 'Unknown'),
         subtitle: 'Apply the suggested permission change',
       };
     }
     const obj = sug as Record<string, unknown>;
-    const type = obj.type as string | undefined;
+    const type = (obj.type as string) ?? undefined;
     const suggestionTool =
       (obj.toolName as string | undefined) ??
       (obj.tool_name as string | undefined) ??
