@@ -42,6 +42,9 @@ pub struct BubbleData {
     pub update_url: Option<String>,
     pub update_notes: Option<String>,
     pub update_lang: Option<String>,
+    // AskUserQuestion: original questions array for passing through in updatedInput
+    #[serde(default)]
+    pub ask_questions: Option<serde_json::Value>,
 }
 
 pub struct BubbleEntry {
@@ -310,6 +313,7 @@ pub fn show_progress_bubble(
         update_url: None,
         update_notes: None,
         update_lang: Some(lang.to_string()),
+        ask_questions: None,
     };
 
     if show_bubble(app, bubbles, data) {

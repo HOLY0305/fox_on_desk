@@ -211,6 +211,7 @@ fn show_status_bubble(app: &AppHandle, title_key: &str, description: &str) {
         update_url: None,
         update_notes: None,
         update_lang: None,
+        ask_questions: None,
     };
 
     let id = data.id.clone();
@@ -262,6 +263,7 @@ fn show_update_bubble(app: &AppHandle, release: &ReleaseInfo) {
         update_url: Some(release.url.clone()),
         update_notes: Some(notes),
         update_lang: Some(lang),
+        ask_questions: None,
     };
 
     crate::permission::show_bubble(app, &bubbles, data);

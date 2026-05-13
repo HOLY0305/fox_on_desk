@@ -202,6 +202,7 @@ fn trigger_mode_notice(app: &AppHandle, _session_id: &str, mode: &PermissionMode
         update_url: None,
         update_notes: None,
         update_lang: None,
+        ask_questions: None,
     };
 
     if let Some(bubbles) = app.try_state::<crate::permission::BubbleMap>() {

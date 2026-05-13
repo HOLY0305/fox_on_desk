@@ -566,10 +566,9 @@ async fn post_permission(
 
     // Detect AskUserQuestion tool — extract questions/options as suggestions
     let is_ask_user = tool_name == "AskUserQuestion";
-    let ask_questions: Option<Value> = if is_ask_user && suggestions.is_empty() {
-        tool_input.get("questions").and_then(|q| q.as_array()).map(|_| {
-            tool_input.get("questions").cloned().unwrap_or(json!([]))
-        })
+    // Store original questions for passing through in updatedInput
+    let ask_original_questions: Option<Value> = if is_ask_user && suggestions.is_empty() {
+        tool_input.get("questions").cloned()
     } else {
         None
     };
@@ -584,7 +583,6 @@ async fn post_permission(
                                 "type": "askUserChoice",
                                 "label": label,
                                 "question": question,
-                                "_questions": ask_questions,
                             }));
                         }
                     }
@@ -639,6 +637,7 @@ async fn post_permission(
         update_url: None,
         update_notes: None,
         update_lang: None,
+        ask_questions: ask_original_questions,
     };
     crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "permission_request");
     let response = match queue_request_and_wait(&ctx, bubble_data).await {
@@ -713,6 +712,7 @@ async fn post_elicitation(
         update_url: None,
         update_notes: None,
         update_lang: None,
+        ask_questions: None,
     };
 
     let response = match queue_request_and_wait(&ctx, bubble_data).await {
@@ -1043,12 +1043,15 @@ pub fn resolve_permission(
                     if sug.get("type").and_then(|t| t.as_str()) == Some("askUserChoice") {
                         let question = sug.get("question").and_then(|q| q.as_str()).unwrap_or("");
                         let label = sug.get("label").and_then(|l| l.as_str()).unwrap_or("");
-                        // Pass through original questions + answers — updatedInput replaces entire tool_input
-                        let questions = sug.get("_questions").cloned().unwrap_or_else(|| {
-                            json!([{ "question": question, "options": [{"label": label}], "multiSelect": false }])
-                        });
+                        // Retrieve original questions from bubble data
+                        let original_q = approval_queue
+                            .lock_or_recover()
+                            .request_data
+                            .get(&id)
+                            .and_then(|d| d.ask_questions.clone())
+                            .unwrap_or_else(|| json!([{ "question": question, "options": [{"label": label}], "multiSelect": false }]));
                         let updated = json!({
-                            "questions": questions,
+                            "questions": original_q,
                             "answers": { question: label }
                         });
                         HookDecision::Permission(PermDecision::AllowWithAnswer(updated))
