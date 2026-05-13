@@ -183,9 +183,8 @@
   /* Badge dots — visual only, no pointer events */
   .badge-dots {
     position: absolute;
-    right: 2px;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 25%;
+    top: 35%;
     display: flex;
     flex-direction: column;
     gap: 4px;
