@@ -35,7 +35,6 @@ pub enum PermDecision {
     Allow,
     Deny,
     AllowWithPermissions(Vec<serde_json::Value>),
-    AllowWithAnswer(serde_json::Value),
 }
 
 #[derive(Debug, Clone)]
@@ -913,12 +912,6 @@ fn perm_response(decision: &PermDecision) -> Value {
             "behavior": "allow",
             "updatedPermissions": perms
         }),
-        PermDecision::AllowWithAnswer(answers) => json!({
-            "behavior": "allow",
-            "updatedInput": {
-                "answers": answers
-            }
-        }),
     };
     json!({
         "hookSpecificOutput": {
@@ -1039,22 +1032,9 @@ pub fn resolve_permission(
         } else {
             match (decision.as_str(), selected_suggestion) {
                         ("allow", Some(sug)) => {
-                    // Check if this is an AskUserQuestion choice
+                    // AskUserQuestion: just allow, Claude Code will prompt in terminal
                     if sug.get("type").and_then(|t| t.as_str()) == Some("askUserChoice") {
-                        let question = sug.get("question").and_then(|q| q.as_str()).unwrap_or("");
-                        let label = sug.get("label").and_then(|l| l.as_str()).unwrap_or("");
-                        // Retrieve original questions from bubble data
-                        let original_q = approval_queue
-                            .lock_or_recover()
-                            .request_data
-                            .get(&id)
-                            .and_then(|d| d.ask_questions.clone())
-                            .unwrap_or_else(|| json!([{ "question": question, "options": [{"label": label}], "multiSelect": false }]));
-                        let updated = json!({
-                            "questions": original_q,
-                            "answers": { question: label }
-                        });
-                        HookDecision::Permission(PermDecision::AllowWithAnswer(updated))
+                        HookDecision::Permission(PermDecision::Allow)
                     } else {
                         HookDecision::Permission(PermDecision::AllowWithPermissions(vec![sug]))
                     }
