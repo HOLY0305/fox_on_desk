@@ -61,7 +61,8 @@
       const count = clickCount;
       clickCount = 0;
       if (!isDragging) {
-        if (count === 2) invoke('hit_double_click');
+        if (count === 1) invoke('hit_single_click');
+        else if (count === 2) invoke('hit_double_click');
         else if (count >= 4) invoke('hit_flail');
       }
     }, 300);

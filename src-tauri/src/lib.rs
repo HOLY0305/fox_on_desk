@@ -529,6 +529,25 @@ fn exit_mini_mode(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHandl
 }
 
 #[tauri::command]
+fn hit_single_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHandle>) {
+    let is_mini = prefs::is_mini_mode(&app);
+    if is_mini {
+        cancel_pending_task(&abort_handle);
+        mini::do_exit_mini(&app);
+        return;
+    }
+    // Play a quick poke reaction
+    if let Some(pet) = app.get_webview_window("pet") {
+        let _ = pet.emit(
+            "play-click-reaction",
+            serde_json::json!({
+                "svg": "clyde-react-double.svg", "duration_ms": 500
+            }),
+        );
+    }
+}
+
+#[tauri::command]
 fn hit_double_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHandle>) {
     let is_mini = prefs::is_mini_mode(&app);
     if is_mini {
@@ -1875,8 +1894,25 @@ fn start_cleanup_loop(app: &AppHandle, state: SharedState) {
     let app_for_cleanup = app.clone();
     tauri::async_runtime::spawn(async move {
         let mut interval = tokio::time::interval(std::time::Duration::from_secs(10));
+        let mut tick_count: u64 = 0;
         loop {
             interval.tick().await;
+            tick_count += 1;
+
+            // Re-assert alwaysOnTop every 60 seconds to prevent the pet from
+            // getting buried behind other windows on Windows.
+            if tick_count % 6 == 0 {
+                let is_hidden = crate::is_hidden(&app_for_cleanup);
+                if !is_hidden {
+                    if let Some(pet) = app_for_cleanup.get_webview_window("pet") {
+                        let _ = pet.set_always_on_top(true);
+                    }
+                    if let Some(hit) = app_for_cleanup.get_webview_window("hit") {
+                        let _ = hit.set_always_on_top(true);
+                    }
+                }
+            }
+
             let changed = state_for_cleanup.lock_or_recover().clean_stale();
             if changed {
                 let (resolved, svg) = {
@@ -1941,7 +1977,7 @@ pub fn run() {
         .manage(sfx_bank.clone())
         .invoke_handler(tauri::generate_handler![
             drag_start, drag_move, drag_end, exit_mini_mode,
-            hit_double_click, hit_flail, show_context_menu,
+            hit_single_click, hit_double_click, hit_flail, show_context_menu,
             toggle_dnd, mini_peek_in, mini_peek_out,
             get_pet_config, get_interaction_state, get_current_hit_layout, get_menu_data, menu_action,
             http_server::resolve_permission,
