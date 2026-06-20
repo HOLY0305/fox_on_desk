@@ -209,6 +209,22 @@ npm test             # cargo test（19 个单元测试）
 </table>
 
 
+## 相比原版的改进
+
+基于 [Clyde on Desk](https://github.com/QingJ01/Clyde) 二次开发，主要改进如下：
+
+| 改进 | 说明 |
+|------|------|
+| **Fox 角色** | 全新狐狸图标和皮肤系统，透明背景 |
+| **多皮肤支持** | 右键菜单可切换 Clyde / Fox 皮肤 |
+| **XL 尺寸** | 新增 480px 宠物尺寸（S / M / L / XL） |
+| **音效系统** | 关键事件播放像素风格音效（权限、完成、错误） |
+| **Alt+C 快捷键** | 一键将宠物召唤到鼠标位置 |
+| **双击启动** | 双击宠物打开文件夹选择器，启动新 Claude 会话 |
+| **AskUserQuestion 支持** | 权限气泡支持 Claude 的结构化输入提示 |
+| **AlwaysOnTop 修复** | 其他窗口抢焦点后宠物自动回到顶层 |
+| **Always on Desk** | 每 60 秒重新断言 alwaysOnTop，防止宠物被隐藏 |
+
 ## 致谢
 
 - 由 [Clawd on Desk](https://github.com/rullerzhou-afk/clawd-on-desk) ([@rullerzhou-afk](https://github.com/rullerzhou-afk)) 演化而来 — 最初的 Clawd 桌宠项目

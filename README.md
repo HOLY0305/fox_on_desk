@@ -208,6 +208,22 @@ npm test             # cargo test (19 unit tests)
   </tr>
 </table>
 
+## What's Changed (vs Clyde)
+
+This project is forked from [Clyde on Desk](https://github.com/QingJ01/Clyde) with the following improvements:
+
+| Change | Description |
+|--------|-------------|
+| **Fox character** | New fox icon and skin system with transparent background |
+| **Multi-skin support** | Switch between Clyde and Fox skins from the context menu |
+| **XL size option** | New 480px pet size (S / M / L / XL) |
+| **Sound effects** | Pixel-style audio feedback for key events (permission, complete, error) |
+| **Alt+C shortcut** | Summon pet to cursor position |
+| **Double-click launch** | Double-click pet to open a folder picker for a new Claude session |
+| **AskUserQuestion support** | Permission bubbles now handle Claude's structured input prompts |
+| **AlwaysOnTop fix** | Pet stays on top even after other windows steal focus |
+| **Always on Desk** | Re-asserts alwaysOnTop every 60s to prevent the pet from being hidden |
+
 ## Acknowledgments
 
 - Forked from [Clawd on Desk](https://github.com/rullerzhou-afk/clawd-on-desk) by [@rullerzhou-afk](https://github.com/rullerzhou-afk) — the original Clawd desktop pet project that inspired Clyde
