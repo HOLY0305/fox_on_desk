@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="assets/tray-icon.png" width="128" alt="Clyde">
+  <img src="assets/tray-icon.png" width="128" alt="Fox">
 </p>
-<h1 align="center">Clyde on Desk</h1>
+<h1 align="center">Fox on Desk</h1>
 <p align="center">
   A lightweight desktop pet that mirrors your AI coding agent in real time
   <br>
@@ -15,14 +15,14 @@
   <img src="https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-grey" alt="platforms">
 </p>
 
-Clyde sits on your desktop and reflects what your AI coding agent is doing: thinking when you prompt, typing when tools run, juggling subagents, popping permission bubbles, celebrating on completion, and sleeping when you step away.
+Fox sits on your desktop and reflects what your AI coding agent is doing: thinking when you prompt, typing when tools run, juggling subagents, popping permission bubbles, celebrating on completion, and sleeping when you step away.
 
 Works with **Claude Code**, **Codex CLI**, and **Copilot CLI** — all three can run simultaneously.
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/QingJ01/Clyde.git
+git clone https://github.com/HOLY0305/Clyde.git
 cd Clyde
 npm install
 npm start        # Tauri dev mode with hot-reload
@@ -41,7 +41,7 @@ npm start        # Tauri dev mode with hot-reload
 
 12 animated states driven by real-time agent events:
 
-| Agent Event | Clyde Does | Preview |
+| Agent Event | Fox Does | Preview |
 |---|---|---|
 | Idle | Follows your cursor (eye tracking + body lean) | <img src="assets/gif/clawd-idle.gif" width="80" /> |
 | UserPromptSubmit | Thinking | <img src="assets/gif/clawd-thinking.gif" width="80" /> |
@@ -65,13 +65,13 @@ npm start        # Tauri dev mode with hot-reload
 
 ### Mini Mode
 
-Drag Clyde to the left or right screen edge (or right-click "Mini Mode"). Clyde hides behind the edge, peeks out on hover, and shows mini alerts/celebrations while tucked away.
+Drag Fox to the left or right screen edge (or right-click "Mini Mode"). Fox hides behind the edge, peeks out on hover, and shows mini alerts/celebrations while tucked away.
 
 ### Permission Bubbles
 
-When Claude Code requests tool permissions, Clyde pops a floating card near the pet — allow, deny, or apply a suggestion rule (e.g. "Always allow Read"). Multiple requests stack upward from the pet. If you answer in the terminal first, the bubble auto-dismisses.
+When Claude Code requests tool permissions, Fox pops a floating card near the pet — allow, deny, or apply a suggestion rule (e.g. "Always allow Read"). Multiple requests stack upward from the pet. If you answer in the terminal first, the bubble auto-dismisses.
 
-Clyde also tracks Claude's **permission mode** in real time. When the mode changes (e.g. switching to "Accept Edits" via `/permissions`), a brief notification appears near the pet:
+Fox also tracks Claude's **permission mode** in real time. When the mode changes (e.g. switching to "Accept Edits" via `/permissions`), a brief notification appears near the pet:
 
 | Mode | Meaning |
 |------|---------|
@@ -149,20 +149,20 @@ assets/svg/              35 animation frames
 This is macOS Gatekeeper blocking unsigned apps — the app is not actually damaged. Fix:
 
 ```bash
-xattr -cr "/Applications/Clyde on Desk.app"
-codesign --force --deep --sign - "/Applications/Clyde on Desk.app"
+xattr -cr "/Applications/Fox on Desk.app"
+codesign --force --deep --sign - "/Applications/Fox on Desk.app"
 ```
 
 The first command clears the quarantine flag, the second adds an ad-hoc signature (required on Apple Silicon).
 
 ### Permission bubbles not appearing
 
-If Clyde's permission approval bubbles don't show when Claude Code requests tool permissions:
+If Fox's permission approval bubbles don't show when Claude Code requests tool permissions:
 
 1. In Claude Code, run `/hooks` and check that `PermissionRequest` has an `[http]` hook
-2. If missing or malformed, restart Clyde — it re-registers hooks on startup
+2. If missing or malformed, restart Fox — it re-registers hooks on startup
 3. If still broken, run `node hooks/install.js` manually
-4. As a last resort, delete the `PermissionRequest` entry from `~/.claude/settings.json` and restart Clyde
+4. As a last resort, delete the `PermissionRequest` entry from `~/.claude/settings.json` and restart Fox
 
 The correct format in `~/.claude/settings.json` should look like:
 
@@ -181,7 +181,7 @@ The correct format in `~/.claude/settings.json` should look like:
 
 ## Contributing
 
-Issues, ideas, and PRs welcome — [open an issue](https://github.com/QingJ01/Clyde/issues) or submit a PR.
+Issues, ideas, and PRs welcome — [open an issue](https://github.com/HOLY0305/Clyde/issues) or submit a PR.
 
 ```bash
 npm test             # cargo test (19 unit tests)

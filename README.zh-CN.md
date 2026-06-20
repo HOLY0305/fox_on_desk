@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="assets/tray-icon.png" width="128" alt="Clyde">
+  <img src="assets/tray-icon.png" width="128" alt="Fox">
 </p>
-<h1 align="center">Clyde 桌宠</h1>
+<h1 align="center">Fox 桌宠</h1>
 <p align="center">
   轻量级 AI 编程桌宠，实时映射助手工作状态
   <br>
@@ -15,14 +15,14 @@
   <img src="https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-grey" alt="platforms">
 </p>
 
-Clyde 是一只住在桌面上的宠物，能实时感知 AI 编程助手在做什么：提问时思考，跑工具时打字，子代理工作时杂耍，弹卡片审批权限，任务完成时庆祝，你离开时睡觉。
+Fox 是一只住在桌面上的宠物，能实时感知 AI 编程助手在做什么：提问时思考，跑工具时打字，子代理工作时杂耍，弹卡片审批权限，任务完成时庆祝，你离开时睡觉。
 
 支持 **Claude Code**、**Codex CLI** 和 **Copilot CLI**，三者可同时运行。
 
 ## 快速开始
 
 ```bash
-git clone https://github.com/QingJ01/Clyde.git
+git clone https://github.com/HOLY0305/Clyde.git
 cd Clyde
 npm install
 npm start        # Tauri 开发模式，前端热更新
@@ -41,7 +41,7 @@ npm start        # Tauri 开发模式，前端热更新
 
 12 种动画状态，由实时 Agent 事件驱动：
 
-| Agent 事件 | Clyde 的反应 | 预览 |
+| Agent 事件 | Fox 的反应 | 预览 |
 |---|---|---|
 | 空闲 | 眼球跟随鼠标，身体微倾 | <img src="assets/gif/clawd-idle.gif" width="80" /> |
 | 提交提示词 | 思考 | <img src="assets/gif/clawd-thinking.gif" width="80" /> |
@@ -65,13 +65,13 @@ npm start        # Tauri 开发模式，前端热更新
 
 ### 极简模式
 
-拖到左/右屏幕边缘（或右键"极简模式"），Clyde 藏到边缘只露半身，悬停时探头，收起状态下仍能显示迷你通知和庆祝动画。
+拖到左/右屏幕边缘（或右键"极简模式"），Fox 藏到边缘只露半身，悬停时探头，收起状态下仍能显示迷你通知和庆祝动画。
 
 ### 权限审批气泡
 
-Claude Code 请求工具权限时，Clyde 在宠物旁弹出浮动卡片 — 允许、拒绝或选择建议规则（如"始终允许 Read"）。多个请求从宠物位置向上堆叠。如果你先在终端回答了，气泡自动消失。
+Claude Code 请求工具权限时，Fox 在宠物旁弹出浮动卡片 — 允许、拒绝或选择建议规则（如"始终允许 Read"）。多个请求从宠物位置向上堆叠。如果你先在终端回答了，气泡自动消失。
 
-Clyde 还会实时跟踪 Claude 的**权限模式**。当模式切换时（如通过 `/permissions` 切换到"自动编辑"），宠物旁会弹出短暂通知：
+Fox 还会实时跟踪 Claude 的**权限模式**。当模式切换时（如通过 `/permissions` 切换到"自动编辑"），宠物旁会弹出短暂通知：
 
 | 模式 | 含义 |
 |------|------|
@@ -149,20 +149,20 @@ assets/svg/              35 个动画帧
 这是 macOS Gatekeeper 拦截未签名应用，并非真的损坏。修复方法：
 
 ```bash
-xattr -cr "/Applications/Clyde on Desk.app"
-codesign --force --deep --sign - "/Applications/Clyde on Desk.app"
+xattr -cr "/Applications/Fox on Desk.app"
+codesign --force --deep --sign - "/Applications/Fox on Desk.app"
 ```
 
 第一条命令清除隔离标记，第二条添加本地临时签名（Apple Silicon 必需）。
 
 ### 权限气泡不弹出
 
-如果 Claude Code 请求工具权限时 Clyde 没有弹出审批卡片：
+如果 Claude Code 请求工具权限时 Fox 没有弹出审批卡片：
 
 1. 在 Claude Code 中运行 `/hooks`，检查 `PermissionRequest` 是否有 `[http]` hook
-2. 如果缺失或格式错误，重启 Clyde — 启动时会自动重新注册 hooks
+2. 如果缺失或格式错误，重启 Fox — 启动时会自动重新注册 hooks
 3. 如果仍有问题，手动运行 `node hooks/install.js`
-4. 最后手段：删除 `~/.claude/settings.json` 中的 `PermissionRequest` 条目，重启 Clyde
+4. 最后手段：删除 `~/.claude/settings.json` 中的 `PermissionRequest` 条目，重启 Fox
 
 `~/.claude/settings.json` 中正确的格式应为：
 
@@ -181,7 +181,7 @@ codesign --force --deep --sign - "/Applications/Clyde on Desk.app"
 
 ## 贡献
 
-欢迎 Issue、建议和 PR — [提交 Issue](https://github.com/QingJ01/Clyde/issues) 或直接提 PR。
+欢迎 Issue、建议和 PR — [提交 Issue](https://github.com/HOLY0305/Clyde/issues) 或直接提 PR。
 
 ```bash
 npm test             # cargo test（19 个单元测试）
