@@ -4,7 +4,7 @@
 // Copyright (c) rullerzhou-afk, licensed under the MIT License.
 // See NOTICE file in the project root for full license text.
 //
-// Clyde Desktop Pet — Claude Code Hook Script
+// Fox Desktop Pet — Claude Code Hook Script
 // Zero dependencies, fast cold start, 1s timeout
 // Usage: node clyde-hook.js <event_name>
 // Reads stdin JSON from Claude Code for session_id

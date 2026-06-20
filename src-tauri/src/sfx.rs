@@ -29,14 +29,14 @@ impl SfxPlayer {
                 if let Ok(mut guard) = STREAM_KEEPALIVE.lock() {
                     guard.0 = Some(stream);
                 }
-                println!("Clyde: audio initialized successfully");
+                println!("Fox:audio initialized successfully");
                 Some(SfxPlayer {
                     handle,
                     enabled: AtomicBool::new(true),
                 })
             }
             Err(e) => {
-                eprintln!("Clyde: audio init failed: {e}");
+                eprintln!("Fox:audio init failed: {e}");
                 None
             }
         }
@@ -52,10 +52,10 @@ impl SfxPlayer {
 
     fn play_bytes(&self, data: &[u8]) {
         if !self.is_enabled() {
-            println!("Clyde: sfx skipped (disabled)");
+            println!("Fox:sfx skipped (disabled)");
             return;
         }
-        println!("Clyde: sfx playing {} bytes", data.len());
+        println!("Fox:sfx playing {} bytes", data.len());
         let cursor = Cursor::new(data.to_vec());
         let buf_reader = BufReader::new(cursor);
         match Decoder::new(buf_reader) {
@@ -64,22 +64,22 @@ impl SfxPlayer {
                     Ok(sink) => {
                         sink.append(source.amplify(3.0));
                         sink.detach(); // Play in background, don't block
-                        println!("Clyde: sfx appended to sink");
+                        println!("Fox:sfx appended to sink");
                     }
                     Err(e) => {
-                        eprintln!("Clyde: sink creation error: {e}");
+                        eprintln!("Fox:sink creation error: {e}");
                         // Fallback: try play_raw
                         let cursor2 = Cursor::new(data.to_vec());
                         let buf2 = BufReader::new(cursor2);
                         if let Ok(src2) = Decoder::new(buf2) {
                             let _ = self.handle.play_raw(src2.convert_samples());
-                            println!("Clyde: sfx fallback play_raw");
+                            println!("Fox:sfx fallback play_raw");
                         }
                     }
                 }
             }
             Err(e) => {
-                eprintln!("Clyde: sfx decode error: {e}");
+                eprintln!("Fox:sfx decode error: {e}");
             }
         }
     }

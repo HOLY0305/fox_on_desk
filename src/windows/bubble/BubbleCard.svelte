@@ -476,7 +476,7 @@
     <div class="glow glow-update"></div>
     <div class="header bubble-drag-handle">
       <div class="header-copy">
-        <span class="eyebrow">Clyde</span>
+        <span class="eyebrow">Fox</span>
         <span class="title">
           {updateLang === 'zh' ? '发现新版本' : 'Update Available'}
         </span>

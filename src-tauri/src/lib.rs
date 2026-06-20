@@ -151,7 +151,7 @@ fn emit_interaction_state(app: &AppHandle, prefs: &prefs::Prefs) {
 
 fn sync_autostart_pref(enabled: bool) {
     if let Err(e) = hooks::sync_auto_start_config(enabled) {
-        eprintln!("Clyde: failed to sync auto-start config: {e}");
+        eprintln!("Fox:failed to sync auto-start config: {e}");
     }
 }
 
@@ -575,7 +575,7 @@ fn hit_double_click(app: AppHandle, abort_handle: tauri::State<'_, SleepAbortHan
     app.dialog().file().pick_folder(move |folder| {
         if let Some(path) = folder {
             let path_str = path.to_string();
-            println!("Clyde: launching Claude Code in {path_str}");
+            println!("Fox:launching Claude Code in {path_str}");
             let escaped_path = path_str.replace('\'', "''");
             // Write a temp script to avoid wt argument parsing issues
             let script = format!(
@@ -1823,7 +1823,7 @@ fn handle_context_menu_event(app: &AppHandle, state: &SharedState, id: &str) {
 
 fn setup_pet_window(app: &AppHandle, prefs: &prefs::Prefs) -> Option<windows::WindowBounds> {
     let Some(pet) = app.get_webview_window("pet") else {
-        eprintln!("Clyde: pet window not found!");
+        eprintln!("Fox:pet window not found!");
         return None;
     };
     let desired_bounds = preferred_bounds_for_current_display(app, prefs);
@@ -1852,17 +1852,17 @@ fn setup_pet_window(app: &AppHandle, prefs: &prefs::Prefs) -> Option<windows::Wi
     }
 
     if let Err(e) = pet.set_background_color(Some(Color(0, 0, 0, 0))) {
-        eprintln!("Clyde: set_background_color failed: {e}");
+        eprintln!("Fox:set_background_color failed: {e}");
     }
     let _ = pet.set_ignore_cursor_events(true);
     apply_pet_window_geometry(app, &resolved_bounds);
     macos_spaces::apply_space_follow(&pet);
     if let Err(e) = pet.show() {
-        eprintln!("Clyde: pet.show() failed: {e}");
+        eprintln!("Fox:pet.show() failed: {e}");
     }
     emit_pet_config(app, prefs);
     println!(
-        "Clyde: pet window shown ({}x{}) at ({},{})",
+        "Fox:pet window shown ({}x{}) at ({},{})",
         w, h, resolved_x, resolved_y
     );
     #[cfg(debug_assertions)]
@@ -1882,7 +1882,7 @@ fn setup_hit_window(app: &AppHandle, initial_bounds: Option<&windows::WindowBoun
     if let Some(bounds) = initial_bounds.or(fallback_bounds.as_ref()) {
         sync_hit_for_bounds(app, bounds);
     } else {
-        eprintln!("Clyde: could not get pet bounds for hit window sync");
+        eprintln!("Fox:could not get pet bounds for hit window sync");
     }
     if let Some(hit) = app.get_webview_window("hit") {
         macos_spaces::apply_space_follow(&hit);
@@ -1904,9 +1904,9 @@ fn setup_tray(app: &AppHandle, prefs: &prefs::Prefs, shared_tray: &tray::SharedT
         match tray::build_tray(app, &prefs.lang) {
             Ok(tray_icon) => {
                 *shared_tray.lock_or_recover() = Some(tray_icon);
-                println!("Clyde: tray icon created");
+                println!("Fox:tray icon created");
             }
-            Err(e) => eprintln!("Clyde: tray error: {e}"),
+            Err(e) => eprintln!("Fox:tray error: {e}"),
         }
     }
 }
@@ -2119,7 +2119,7 @@ pub fn run() {
                                 auto_start_enabled,
                             };
                             if let Err(e) = installer.register() {
-                                eprintln!("Clyde: failed to register hooks: {e}");
+                                eprintln!("Fox:failed to register hooks: {e}");
                             } else {
                                 // Verify permission hook health after registration
                                 let perm_url = format!("http://127.0.0.1:{port}/permission");
@@ -2129,10 +2129,10 @@ pub fn run() {
                                     if let Ok(raw) = std::fs::read_to_string(&settings_path) {
                                         if let Ok(settings) = serde_json::from_str::<serde_json::Value>(&raw) {
                                             if hooks::permission_hook_is_healthy(&settings, &perm_url) {
-                                                println!("Clyde: permission hook verified — {perm_url}");
+                                                println!("Fox:permission hook verified — {perm_url}");
                                             } else {
-                                                eprintln!("Clyde: WARNING — permission hook may be malformed in {}", settings_path.display());
-                                                eprintln!("Clyde: expected nested format with URL {perm_url}");
+                                                eprintln!("Fox:WARNING — permission hook may be malformed in {}", settings_path.display());
+                                                eprintln!("Fox:expected nested format with URL {perm_url}");
                                             }
                                         }
                                     }
@@ -2140,7 +2140,7 @@ pub fn run() {
                             }
                         }
                         None => {
-                            eprintln!("Clyde: HTTP server failed to start — skipping hook installation");
+                            eprintln!("Fox:HTTP server failed to start — skipping hook installation");
                         }
                     }
                 });

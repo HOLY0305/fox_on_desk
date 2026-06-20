@@ -543,7 +543,7 @@ async fn post_permission(
 
     // Log raw payload for debugging field name mismatches
     eprintln!(
-        "Clyde: /permission payload keys: {:?}",
+        "Fox:/permission payload keys: {:?}",
         payload
             .as_object()
             .map(|o| o.keys().collect::<Vec<_>>())
@@ -608,7 +608,7 @@ async fn post_permission(
         }
     }
 
-    eprintln!("Clyde: /permission tool={} suggestions={} ask={}", tool_name, suggestions.len(), is_ask_user);
+    eprintln!("Fox:/permission tool={} suggestions={} ask={}", tool_name, suggestions.len(), is_ask_user);
 
     let display = extract_request_display_meta(&ctx, &payload, &tool_input, "claude-code");
     let entry_id = uuid::Uuid::new_v4().to_string();
@@ -655,7 +655,7 @@ async fn post_elicitation(
     headers.insert(CLYDE_SERVER_HEADER, CLYDE_SERVER_ID.parse().unwrap());
 
     eprintln!(
-        "Clyde: /elicitation payload keys: {:?}",
+        "Fox:/elicitation payload keys: {:?}",
         payload
             .as_object()
             .map(|o| o.keys().collect::<Vec<_>>())
@@ -974,12 +974,12 @@ pub async fn start_server(
             let actual_port = listener.local_addr().map(|a| a.port()).unwrap_or(port);
             tauri::async_runtime::spawn(axum::serve(listener, router).into_future());
             write_runtime_port(actual_port);
-            println!("Clyde: HTTP server listening on 127.0.0.1:{actual_port}");
+            println!("Fox:HTTP server listening on 127.0.0.1:{actual_port}");
             return Some(actual_port);
         }
     }
     eprintln!(
-        "Clyde: no available ports in range {DEFAULT_PORT}-{}",
+        "Fox:no available ports in range {DEFAULT_PORT}-{}",
         DEFAULT_PORT + 6
     );
     None

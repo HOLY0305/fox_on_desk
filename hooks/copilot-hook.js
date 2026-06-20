@@ -4,7 +4,7 @@
 // Copyright (c) rullerzhou-afk, licensed under the MIT License.
 // See NOTICE file in the project root for full license text.
 //
-// Clyde Desktop Pet — Copilot CLI Hook Script
+// Fox Desktop Pet — Copilot CLI Hook Script
 // Zero dependencies, fast cold start, 1s timeout
 // Usage: node copilot-hook.js <event_name>
 // Reads stdin JSON from Copilot CLI for sessionId (camelCase)

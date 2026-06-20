@@ -1,11 +1,11 @@
 [package]
-name = "clyde"
+name = "fox"
 version = "0.1.6"
 edition = "2021"
 license = "AGPL-3.0-only"
 
 [lib]
-name = "clyde_lib"
+name = "fox_lib"
 crate-type = ["cdylib", "rlib"]
 
 [build-dependencies]

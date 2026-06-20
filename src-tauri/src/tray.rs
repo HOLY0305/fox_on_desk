@@ -305,7 +305,7 @@ pub fn rebuild_menu(app: &AppHandle, lang: &str) {
                 Ok(menu) => {
                     let _ = tray.set_menu(Some(menu));
                 }
-                Err(e) => eprintln!("Clyde: rebuild menu failed: {e}"),
+                Err(e) => eprintln!("Fox:rebuild menu failed: {e}"),
             }
         }
     }

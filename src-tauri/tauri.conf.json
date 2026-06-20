@@ -1,7 +1,7 @@
 {
-  "productName": "Clyde on Desk",
+  "productName": "Fox on Desk",
   "version": "0.1.6",
-  "identifier": "com.clyde.on-desk",
+  "identifier": "com.fox.on-desk",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "pet",
-        "title": "Clyde on Desk",
+        "title": "Fox on Desk",
         "width": 200,
         "height": 200,
         "decorations": false,

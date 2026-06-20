@@ -523,7 +523,7 @@ function registerHooks(options = {}) {
   if (!options.silent) {
     const versionLabel = versionInfo.status === "known" ? versionInfo.version : "unknown";
     const versionSource = versionInfo.source || "unavailable";
-    console.log(`Clyde hooks installed to ${settingsPath}`);
+    console.log(`Fox hooks installed to ${settingsPath}`);
     console.log(`  Claude Code version: ${versionLabel}`);
     console.log(`  Detection source: ${versionSource}`);
     if (versionInfo.status === "unknown") {

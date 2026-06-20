@@ -189,7 +189,7 @@
       onkeydown={onKeyDown}
       role="button"
       tabindex="0"
-      aria-label="Clyde desktop pet"
+      aria-label="Fox desktop pet"
     ></div>
   {/each}
 </div>

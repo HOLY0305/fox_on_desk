@@ -60,13 +60,13 @@ jobs:
           APPLE_SIGNING_IDENTITY: '-'
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: '${{ github.ref_name }} — Clyde on Desk'
+          releaseName: '${{ github.ref_name }} — Fox on Desk'
           releaseBody: |
             See [CHANGELOG.md](https://github.com/QingJ01/Clyde/blob/main/CHANGELOG.md) for details.
 
             **macOS users**: If you see "App is damaged", run:
             ```bash
-            xattr -cr "/Applications/Clyde on Desk.app"
+            xattr -cr "/Applications/Fox on Desk.app"
             ```
           releaseDraft: false
           prerelease: false

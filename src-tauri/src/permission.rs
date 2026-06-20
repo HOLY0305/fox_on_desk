@@ -115,7 +115,7 @@ pub fn show_bubble(app: &AppHandle, bubbles: &BubbleMap, data: BubbleData) -> bo
             true
         }
         Err(e) => {
-            eprintln!("Clyde: failed to create bubble window: {e}");
+            eprintln!("Fox:failed to create bubble window: {e}");
             false
         }
     }
@@ -297,7 +297,7 @@ pub fn show_progress_bubble(
         tool_input: serde_json::Value::Null,
         suggestions: Vec::new(),
         session_id: String::new(),
-        agent_label: "Clyde".to_string(),
+        agent_label: "Fox".to_string(),
         session_summary: title.to_string(),
         session_project: String::new(),
         session_short_id: String::new(),

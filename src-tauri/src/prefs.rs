@@ -179,17 +179,17 @@ pub fn save(app: &AppHandle, prefs: &Prefs) {
     let json = match serde_json::to_string_pretty(prefs) {
         Ok(j) => j,
         Err(e) => {
-            eprintln!("Clyde: failed to serialize prefs: {e}");
+            eprintln!("Fox:failed to serialize prefs: {e}");
             return;
         }
     };
     let tmp = path.with_extension("json.tmp");
     if let Err(e) = std::fs::write(&tmp, &json) {
-        eprintln!("Clyde: failed to write prefs tmp: {e}");
+        eprintln!("Fox:failed to write prefs tmp: {e}");
         return;
     }
     if let Err(e) = std::fs::rename(&tmp, &path) {
-        eprintln!("Clyde: failed to rename prefs: {e}");
+        eprintln!("Fox:failed to rename prefs: {e}");
     }
 }
 

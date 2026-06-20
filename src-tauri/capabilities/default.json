@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capabilities for Clyde on Desk",
+  "description": "Default capabilities for Fox on Desk",
   "windows": ["pet", "hit", "bubble-*", "context-menu"],
   "permissions": [
     "core:default",

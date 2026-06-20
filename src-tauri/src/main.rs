@@ -9,7 +9,7 @@ fn main() {
 
     // Custom panic hook to log before potential abort
     std::panic::set_hook(Box::new(|info| {
-        eprintln!("Clyde: PANIC: {info}");
+        eprintln!("Fox:PANIC: {info}");
         if let Some(bt) = std::backtrace::Backtrace::force_capture()
             .to_string()
             .lines()
@@ -23,5 +23,5 @@ fn main() {
         eprintln!("{}", std::backtrace::Backtrace::force_capture());
     }));
 
-    clyde_lib::run();
+    fox_lib::run();
 }

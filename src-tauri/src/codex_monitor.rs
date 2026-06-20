@@ -23,7 +23,7 @@ pub fn start_codex_monitor(app: AppHandle, state: SharedState) {
                 .map(|p| p.display().to_string())
                 .collect::<Vec<_>>()
                 .join(", ");
-            println!("Clyde: codex monitor started, watching {watched}");
+            println!("Fox:codex monitor started, watching {watched}");
 
             loop {
                 std::thread::sleep(Duration::from_millis(POLL_INTERVAL_MS));

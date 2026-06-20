@@ -10,7 +10,7 @@ pub(crate) trait MutexExt<T> {
 impl<T> MutexExt<T> for Mutex<T> {
     fn lock_or_recover(&self) -> MutexGuard<'_, T> {
         self.lock().unwrap_or_else(|e| {
-            eprintln!("Clyde: mutex poisoned, recovering");
+            eprintln!("Fox:mutex poisoned, recovering");
             e.into_inner()
         })
     }

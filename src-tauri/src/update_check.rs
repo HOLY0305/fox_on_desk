@@ -133,7 +133,7 @@ async fn do_check(app: &AppHandle, manual: bool) {
     let release = match fetch_latest_release().await {
         Ok(r) => r,
         Err(e) => {
-            eprintln!("Clyde: update check failed: {e}");
+            eprintln!("Fox:update check failed: {e}");
             if manual {
                 show_status_bubble(app, "checkFailed", &e);
             }
@@ -167,7 +167,7 @@ async fn do_check(app: &AppHandle, manual: bool) {
     }
 
     println!(
-        "Clyde: update available — current={current} latest={}",
+        "Fox:update available — current={current} latest={}",
         release.version
     );
     show_update_bubble(app, &release);

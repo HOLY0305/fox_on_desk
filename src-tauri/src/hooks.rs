@@ -57,7 +57,7 @@ impl HookInstaller {
                     let backup = settings_path.with_extension("json.bak");
                     let _ = std::fs::copy(settings_path, &backup);
                     eprintln!(
-                        "Clyde: settings.json parse error ({e}), backed up to {}",
+                        "Fox:settings.json parse error ({e}), backed up to {}",
                         backup.display()
                     );
                     serde_json::json!({})
