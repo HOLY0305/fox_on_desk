@@ -22,8 +22,8 @@ Works with **Claude Code**, **Codex CLI**, and **Copilot CLI** — all three can
 ## Quick Start
 
 ```bash
-git clone https://github.com/HOLY0305/Clyde.git
-cd Clyde
+git clone https://github.com/HOLY0305/fox_on_desk.git
+cd fox_on_desk
 npm install
 npm start        # Tauri dev mode with hot-reload
 ```
@@ -181,7 +181,7 @@ The correct format in `~/.claude/settings.json` should look like:
 
 ## Contributing
 
-Issues, ideas, and PRs welcome — [open an issue](https://github.com/HOLY0305/Clyde/issues) or submit a PR.
+Issues, ideas, and PRs welcome — [open an issue](https://github.com/HOLY0305/fox_on_desk/issues) or submit a PR.
 
 ```bash
 npm test             # cargo test (19 unit tests)

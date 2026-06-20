@@ -22,8 +22,8 @@ Fox 是一只住在桌面上的宠物，能实时感知 AI 编程助手在做什
 ## 快速开始
 
 ```bash
-git clone https://github.com/HOLY0305/Clyde.git
-cd Clyde
+git clone https://github.com/HOLY0305/fox_on_desk.git
+cd fox_on_desk
 npm install
 npm start        # Tauri 开发模式，前端热更新
 ```
@@ -181,7 +181,7 @@ codesign --force --deep --sign - "/Applications/Fox on Desk.app"
 
 ## 贡献
 
-欢迎 Issue、建议和 PR — [提交 Issue](https://github.com/HOLY0305/Clyde/issues) 或直接提 PR。
+欢迎 Issue、建议和 PR — [提交 Issue](https://github.com/HOLY0305/fox_on_desk/issues) 或直接提 PR。
 
 ```bash
 npm test             # cargo test（19 个单元测试）
