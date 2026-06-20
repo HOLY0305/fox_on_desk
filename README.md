@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/tray-icon.png" width="128" alt="Fox">
+  <img src="assets/icon.png" width="200" alt="Fox on Desk">
 </p>
 <h1 align="center">Fox on Desk</h1>
 <p align="center">
@@ -8,16 +8,18 @@
   <a href="README.zh-CN.md">中文版</a>
 </p>
 <p align="center">
-  <img src="https://img.shields.io/badge/v0.1.0-blue" alt="version">
+  <img src="https://img.shields.io/badge/v0.1.7-blue" alt="version">
   <img src="https://img.shields.io/badge/Tauri_v2-orange" alt="Tauri v2">
   <img src="https://img.shields.io/badge/Svelte_5-red" alt="Svelte 5">
   <img src="https://img.shields.io/badge/Rust-black" alt="Rust">
-  <img src="https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-grey" alt="platforms">
+  <img src="https://img.shields.io/badge/Windows-grey" alt="Windows">
 </p>
 
 Fox sits on your desktop and reflects what your AI coding agent is doing: thinking when you prompt, typing when tools run, juggling subagents, popping permission bubbles, celebrating on completion, and sleeping when you step away.
 
 Works with **Claude Code**, **Codex CLI**, and **Copilot CLI** — all three can run simultaneously.
+
+> Forked from [Clyde on Desk](https://github.com/QingJ01/Clyde). See [What's Changed](#whats-changed) for a list of improvements.
 
 ## Quick Start
 
@@ -28,40 +30,40 @@ npm install
 npm start        # Tauri dev mode with hot-reload
 ```
 
-**Prerequisites** — [Node.js](https://nodejs.org/) v18+, [Rust](https://rustup.rs/) stable, and [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your platform.
+**Prerequisites** — [Node.js](https://nodejs.org/) v18+, [Rust](https://rustup.rs/) stable, and [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for Windows.
 
 **Agent setup** — all zero-config:
-- **Claude Code** — hooks auto-registered on launch (command hooks + HTTP permission hook)
+- **Claude Code** — hooks auto-registered on launch
 - **Codex CLI** — log polling starts automatically (`~/.codex/sessions/`)
 - **Copilot CLI** — auto-configured when `~/.copilot` exists
+
+## What's Changed
+
+Compared to the original [Clyde on Desk](https://github.com/QingJ01/Clyde):
+
+| Change | Description |
+|--------|-------------|
+| **Fox character** | New fox icon and skin system with transparent background |
+| **Multi-skin support** | Switch between Clyde and Fox skins from the context menu |
+| **XL size option** | New 480px pet size (S / M / L / XL) |
+| **Sound effects** | Pixel-style audio feedback for key events |
+| **Alt+C shortcut** | Summon pet to cursor position |
+| **Double-click launch** | Double-click pet to open a folder picker for a new Claude session |
+| **AskUserQuestion** | Permission bubbles handle Claude's structured input prompts |
+| **AlwaysOnTop fix** | Pet stays on top even after other windows steal focus |
 
 ## Features
 
 ### Animations
 
-12 animated states driven by real-time agent events:
-
-| Agent Event | Fox Does | Preview |
-|---|---|---|
-| Idle | Follows your cursor (eye tracking + body lean) | <img src="assets/gif/clawd-idle.gif" width="80" /> |
-| UserPromptSubmit | Thinking | <img src="assets/gif/clawd-thinking.gif" width="80" /> |
-| PreToolUse | Typing | <img src="assets/gif/clawd-typing.gif" width="80" /> |
-| 3+ sessions active | Building | <img src="assets/gif/clawd-building.gif" width="80" /> |
-| 1 subagent | Juggling | <img src="assets/gif/clawd-juggling.gif" width="80" /> |
-| 2+ subagents | Conducting | <img src="assets/gif/clawd-conducting.gif" width="80" /> |
-| PostToolUseFailure | Error flash | <img src="assets/gif/clawd-error.gif" width="80" /> |
-| Stop (task complete) | Happy bounce | <img src="assets/gif/clawd-happy.gif" width="80" /> |
-| Notification | Alert jump | <img src="assets/gif/clawd-notification.gif" width="80" /> |
-| PreCompact | Sweeping | <img src="assets/gif/clawd-sweeping.gif" width="80" /> |
-| WorktreeCreate | Carrying box | <img src="assets/gif/clawd-carrying.gif" width="80" /> |
-| 60s no activity | Yawn → doze → collapse → sleep | <img src="assets/gif/clawd-sleeping.gif" width="80" /> |
+12 animated states driven by real-time agent events — idle eye-tracking, thinking, typing, building, juggling, conducting, error flash, happy bounce, notification, sweeping, carrying, and sleeping.
 
 ### Interaction
 
 - **Drag** anywhere, anytime — Pointer Capture prevents fast-flick drops
 - **Double-click** for a poke reaction; **4 clicks** for a flail
-- **Right-click** context menu — session list, DND, mini mode, size, language
-- **System tray** — resize (S/M/L), DND, mini mode, language, auto-start, quit
+- **Right-click** context menu — session list, DND, mini mode, size, language, skin selection
+- **System tray** — resize (S/M/L/XL), DND, mini mode, language, auto-start, quit
 
 ### Mini Mode
 
@@ -69,23 +71,14 @@ Drag Fox to the left or right screen edge (or right-click "Mini Mode"). Fox hide
 
 ### Permission Bubbles
 
-When Claude Code requests tool permissions, Fox pops a floating card near the pet — allow, deny, or apply a suggestion rule (e.g. "Always allow Read"). Multiple requests stack upward from the pet. If you answer in the terminal first, the bubble auto-dismisses.
-
-Fox also tracks Claude's **permission mode** in real time. When the mode changes (e.g. switching to "Accept Edits" via `/permissions`), a brief notification appears near the pet:
-
-| Mode | Meaning |
-|------|---------|
-| Default | Tool calls require your approval |
-| Accept Edits | Edit operations auto-approved, others may still need approval |
-| Bypass Permissions | No approval bubbles will appear |
-| Plan | No tool execution, planning only |
+When Claude Code requests tool permissions, Fox pops a floating card near the pet — allow, deny, or apply a suggestion rule. Supports both simple tool permissions and **AskUserQuestion** structured input prompts (enum choices, booleans, text fields).
 
 ### Session Intelligence
 
 - **Multi-session priority** — the highest-priority state across all sessions wins
 - **Subagent-aware** — 1 subagent = juggling, 2+ = conducting
 - **Terminal focus** — right-click a session to jump to its terminal
-- **Auto-cleanup** — stale sessions removed after 10 min; working states demoted after 5 min
+- **Auto-cleanup** — stale sessions removed after 10 min
 - **DND mode** — silences all events; toggle via right-click or tray
 
 ## Architecture
@@ -97,139 +90,61 @@ src-tauri/src/           Rust backend
 ├── http_server.rs       Axum HTTP (POST /state, /permission)
 ├── hooks.rs             Hook deployment + settings.json registration
 ├── permission.rs        Permission bubble windows
+├── sfx.rs               Sound effects system
+├── skins.rs             Multi-skin loading + hot-swap
 ├── mini.rs              Edge snap, peek, parabolic jump
 ├── tick.rs              50ms cursor poll (eyes, sleep, peek)
 ├── tray.rs              System tray menu
-├── windows.rs           Window bounds + hit-test math
-├── focus.rs             Terminal focus by PID (Win/Mac/Linux)
 ├── codex_monitor.rs     Codex JSONL log polling
 ├── prefs.rs             Preferences persistence
 └── i18n.rs              English / Chinese strings
 
 src/windows/             Svelte 5 frontend (3 windows)
-├── pet/                 SVG renderer
+├── pet/                 SVG renderer + skin system
 ├── hit/                 Invisible click layer
 └── bubble/              Permission card
 
 hooks/                   JS hooks (embedded at compile time)
-├── clyde-hook.js        Claude Code command hook
-├── server-config.js     Port discovery
-├── auto-start.js        Auto-launch on SessionStart
-├── copilot-hook.js      Copilot CLI hook
-└── install.js           Manual hook registration CLI
-
-assets/svg/              35 animation frames
+assets/skins/            Fox + Clyde SVG skin sets
 ```
 
 ## Tech Stack
 
 | Layer | Technology | Why |
 |---|---|---|
-| **Desktop framework** | [Tauri v2](https://v2.tauri.app/) | ~5 MB bundle (vs 150 MB+ for Electron); native OS APIs (transparent windows, tray, global shortcuts); Rust backend calls with zero IPC serialization overhead |
-| **Backend** | [Rust](https://www.rust-lang.org/) | No GC, zero-cost abstractions; 50 ms timer + multi-session state machine in a single process with near-zero CPU; `Mutex` + `Arc` for thread safety by default |
-| **Frontend** | [Svelte 5](https://svelte.dev/) | Compile-time, no virtual DOM — three windows total < 30 KB JS; `$state` / `$props` reactivity keeps SVG rendering logic minimal |
-| **HTTP server** | [Axum](https://github.com/tokio-rs/axum) | Async web framework on Tokio; type-safe routing + extractors; shares the same Tokio runtime as Tauri — no extra thread pool |
-| **Build tool** | [Vite](https://vitejs.dev/) | Instant HMR in dev; aggressive tree-shaking in production |
-
-**Why this stack:** Rust owns all state logic and system interaction, Svelte is a razor-thin rendering layer, and Tauri glues them into a < 10 MB cross-platform desktop app. No runtime interpreter (Node.js, Python, etc.) — cold start < 1 s, resident memory < 30 MB.
+| **Desktop** | [Tauri v2](https://v2.tauri.app/) | ~5 MB bundle; native OS APIs; Rust backend |
+| **Backend** | [Rust](https://www.rust-lang.org/) | No GC; multi-session state machine; near-zero CPU |
+| **Frontend** | [Svelte 5](https://svelte.dev/) | Compile-time; three windows < 30 KB JS total |
+| **HTTP** | [Axum](https://github.com/tokio-rs/axum) | Async on shared Tokio runtime |
+| **Build** | [Vite](https://vitejs.dev/) | Instant HMR in dev; tree-shaking in production |
 
 ## Known Limitations
 
 | Limitation | Details |
 |---|---|
+| Windows only | Tested on Windows; macOS/Linux support not verified |
 | Codex: no terminal focus | JSONL polling doesn't carry terminal PID |
 | Copilot: no permission bubble | Copilot's hook protocol only supports deny |
-| HTTP server is unauthenticated | Binds `127.0.0.1` only; token auth planned |
 | No auto-update | Download new versions from GitHub Releases |
 
 ## Troubleshooting
 
-### macOS: "App is damaged and can't be opened"
-
-This is macOS Gatekeeper blocking unsigned apps — the app is not actually damaged. Fix:
-
-```bash
-xattr -cr "/Applications/Fox on Desk.app"
-codesign --force --deep --sign - "/Applications/Fox on Desk.app"
-```
-
-The first command clears the quarantine flag, the second adds an ad-hoc signature (required on Apple Silicon).
-
 ### Permission bubbles not appearing
 
-If Fox's permission approval bubbles don't show when Claude Code requests tool permissions:
-
 1. In Claude Code, run `/hooks` and check that `PermissionRequest` has an `[http]` hook
-2. If missing or malformed, restart Fox — it re-registers hooks on startup
+2. If missing, restart Fox — it re-registers hooks on startup
 3. If still broken, run `node hooks/install.js` manually
-4. As a last resort, delete the `PermissionRequest` entry from `~/.claude/settings.json` and restart Fox
-
-The correct format in `~/.claude/settings.json` should look like:
-
-```json
-"PermissionRequest": [
-  {
-    "matcher": "",
-    "hooks": [
-      { "type": "http", "url": "http://127.0.0.1:23333/permission", "timeout": 600 }
-    ]
-  }
-]
-```
-
-> Permission bubbles only appear for tools that trigger Claude Code's `PermissionRequest` event.
+4. Last resort: delete the `PermissionRequest` entry from `~/.claude/settings.json` and restart
 
 ## Contributing
 
 Issues, ideas, and PRs welcome — [open an issue](https://github.com/HOLY0305/fox_on_desk/issues) or submit a PR.
 
-```bash
-npm test             # cargo test (19 unit tests)
-```
-
-### Contributors
-
-<table>
-  <tr>
-    <td align="center"><a href="https://github.com/QingJ01"><img src="https://github.com/QingJ01.png" width="50" style="border-radius:50%" /><br /><sub><b>QingJ01</b></sub></a><br /><sub>Core Contributor</sub></td>
-    <td align="center"><a href="https://github.com/rullerzhou-afk"><img src="https://github.com/rullerzhou-afk.png" width="50" style="border-radius:50%" /><br /><sub><b>rullerzhou-afk</b></sub></a><br /><sub>Original Project Author</sub></td>
-    <td align="center"><a href="https://github.com/PixelCookie-zyf"><img src="https://github.com/PixelCookie-zyf.png" width="50" style="border-radius:50%" /><br /><sub><b>PixelCookie-zyf</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/yujiachen-y"><img src="https://github.com/yujiachen-y.png" width="50" style="border-radius:50%" /><br /><sub><b>yujiachen-y</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/AooooooZzzz"><img src="https://github.com/AooooooZzzz.png" width="50" style="border-radius:50%" /><br /><sub><b>AooooooZzzz</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/purefkh"><img src="https://github.com/purefkh.png" width="50" style="border-radius:50%" /><br /><sub><b>purefkh</b></sub></a><br /><sub>Original Contributor</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="https://github.com/Tobeabellwether"><img src="https://github.com/Tobeabellwether.png" width="50" style="border-radius:50%" /><br /><sub><b>Tobeabellwether</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/Jasonhonghh"><img src="https://github.com/Jasonhonghh.png" width="50" style="border-radius:50%" /><br /><sub><b>Jasonhonghh</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/crashchen"><img src="https://github.com/crashchen.png" width="50" style="border-radius:50%" /><br /><sub><b>crashchen</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/hongbigtou"><img src="https://github.com/hongbigtou.png" width="50" style="border-radius:50%" /><br /><sub><b>hongbigtou</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/InTimmyDate"><img src="https://github.com/InTimmyDate.png" width="50" style="border-radius:50%" /><br /><sub><b>InTimmyDate</b></sub></a><br /><sub>Original Contributor</sub></td>
-    <td align="center"><a href="https://github.com/NeizhiTouhu"><img src="https://github.com/NeizhiTouhu.png" width="50" style="border-radius:50%" /><br /><sub><b>NeizhiTouhu</b></sub></a><br /><sub>Original Contributor</sub></td>
-  </tr>
-</table>
-
-## What's Changed (vs Clyde)
-
-This project is forked from [Clyde on Desk](https://github.com/QingJ01/Clyde) with the following improvements:
-
-| Change | Description |
-|--------|-------------|
-| **Fox character** | New fox icon and skin system with transparent background |
-| **Multi-skin support** | Switch between Clyde and Fox skins from the context menu |
-| **XL size option** | New 480px pet size (S / M / L / XL) |
-| **Sound effects** | Pixel-style audio feedback for key events (permission, complete, error) |
-| **Alt+C shortcut** | Summon pet to cursor position |
-| **Double-click launch** | Double-click pet to open a folder picker for a new Claude session |
-| **AskUserQuestion support** | Permission bubbles now handle Claude's structured input prompts |
-| **AlwaysOnTop fix** | Pet stays on top even after other windows steal focus |
-| **Always on Desk** | Re-asserts alwaysOnTop every 60s to prevent the pet from being hidden |
-
 ## Acknowledgments
 
-- Forked from [Clawd on Desk](https://github.com/rullerzhou-afk/clawd-on-desk) by [@rullerzhou-afk](https://github.com/rullerzhou-afk) — the original Clawd desktop pet project that inspired Clyde
-- Clyde pixel art reference from [clawd-tank](https://github.com/marciogranzotto/clawd-tank) by [@marciogranzotto](https://github.com/marciogranzotto)
+- Forked from [Clyde on Desk](https://github.com/QingJ01/Clyde) by [@QingJ01](https://github.com/QingJ01)
+- Originally from [Clawd on Desk](https://github.com/rullerzhou-afk/clawd-on-desk) by [@rullerzhou-afk](https://github.com/rullerzhou-afk)
 - Thanks to the [LINUX DO](https://linux.do/) community for feedback and support
-- The Clyde character ("ClawdWizard") is a community creation. This project is not officially affiliated with or endorsed by [Anthropic](https://www.anthropic.com).
 
 ## License
 
