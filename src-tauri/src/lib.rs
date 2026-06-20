@@ -46,6 +46,7 @@ pub type HiddenFlag = Arc<Mutex<bool>>;
 #[derive(Clone, Serialize)]
 struct PetConfig {
     opacity: f32,
+    skin: String,
 }
 
 #[derive(Clone, Serialize)]
@@ -81,6 +82,7 @@ struct MenuData {
     auto_dnd_meetings: bool,
     auto_start_with_claude: bool,
     environment_controls_supported: bool,
+    skin: String,
 }
 
 struct DragState {
@@ -132,6 +134,7 @@ fn emit_pet_config(app: &AppHandle, prefs: &prefs::Prefs) {
         "pet-config-changed",
         PetConfig {
             opacity: prefs.opacity,
+            skin: prefs.skin.clone(),
         },
     );
 }
@@ -259,6 +262,18 @@ pub(crate) fn set_permission_decision_window_secs(app: &AppHandle, secs: u16) {
     let mut prefs = prefs_state.lock_or_recover();
     prefs.permission_decision_window_secs = prefs::normalize_permission_decision_window_secs(secs);
     prefs::save(app, &prefs);
+}
+
+pub(crate) fn apply_skin(app: &AppHandle, skin: &str) {
+    let Some(prefs_state) = app.try_state::<SharedPrefs>() else {
+        return;
+    };
+    {
+        let mut prefs = prefs_state.lock_or_recover();
+        prefs.skin = skin.to_string();
+        prefs::save(app, &prefs);
+    }
+    let _ = app.emit("skin-changed", serde_json::json!({ "skin": skin }));
 }
 
 pub(crate) fn toggle_position_lock_pref(app: &AppHandle) {
@@ -606,7 +621,7 @@ fn show_context_menu(
 ) {
     use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 
-    let (lang, is_mini, cur_size, cur_opacity, is_locked, click_through, auto_hide_fullscreen, auto_dnd_meetings, autostart, permission_decision_window_secs) = {
+    let (lang, is_mini, cur_size, cur_opacity, is_locked, click_through, auto_hide_fullscreen, auto_dnd_meetings, autostart, permission_decision_window_secs, cur_skin) = {
         let p = prefs.lock_or_recover();
         (
             p.lang.clone(),
@@ -619,6 +634,7 @@ fn show_context_menu(
             p.auto_dnd_meetings,
             p.auto_start_with_claude,
             p.permission_decision_window_secs,
+            p.skin.clone(),
         )
     };
     let is_dnd = state.lock_or_recover().dnd;
@@ -901,6 +917,26 @@ fn show_context_menu(
         }
     }
 
+    // Skin submenu (with checkmark)
+    let clyde_label = if cur_skin == "clyde" {
+        format!("✓ {}", i18n::t("skinClyde", &lang))
+    } else {
+        i18n::t("skinClyde", &lang)
+    };
+    let fox_label = if cur_skin == "fox" {
+        format!("✓ {}", i18n::t("skinFox", &lang))
+    } else {
+        i18n::t("skinFox", &lang)
+    };
+    if let (Ok(clyde_item), Ok(fox_item)) = (
+        MenuItem::with_id(&app, "ctx-skin-clyde", &clyde_label, true, None::<&str>),
+        MenuItem::with_id(&app, "ctx-skin-fox", &fox_label, true, None::<&str>),
+    ) {
+        if let Ok(sub) = Submenu::with_items(&app, i18n::t("skin", &lang), true, &[&clyde_item, &fox_item]) {
+            items.push(Box::new(sub));
+        }
+    }
+
     // Hide / About / Quit
     if let Ok(sep) = PredefinedMenuItem::separator(&app) {
         items.push(Box::new(sep));
@@ -953,6 +989,7 @@ fn get_pet_config(prefs: tauri::State<'_, SharedPrefs>) -> PetConfig {
     let prefs = prefs.lock_or_recover();
     PetConfig {
         opacity: prefs.opacity,
+        skin: prefs.skin.clone(),
     }
 }
 
@@ -1014,6 +1051,7 @@ fn get_menu_data(
         auto_dnd_meetings: prefs.auto_dnd_meetings,
         auto_start_with_claude: prefs.auto_start_with_claude,
         environment_controls_supported: environment::controls_supported(),
+        skin: prefs.skin.clone(),
     }
 }
 
@@ -1636,6 +1674,21 @@ fn handle_context_menu_event(app: &AppHandle, state: &SharedState, id: &str) {
                 drop(sm);
                 focus::focus_window_by_pid(pid, &cwd);
             }
+        }
+        return;
+    }
+    // Skin switching — support both "ctx-skin-X" (native menu) and "skin-X" (Svelte menu)
+    if id == "skin-clyde" || id == "ctx-skin-clyde" {
+        apply_skin(app, "clyde");
+        if let Some(lang) = app.try_state::<SharedPrefs>().map(|p| p.lock_or_recover().lang.clone()) {
+            tray::rebuild_menu(app, &lang);
+        }
+        return;
+    }
+    if id == "skin-fox" || id == "ctx-skin-fox" {
+        apply_skin(app, "fox");
+        if let Some(lang) = app.try_state::<SharedPrefs>().map(|p| p.lock_or_recover().lang.clone()) {
+            tray::rebuild_menu(app, &lang);
         }
         return;
     }

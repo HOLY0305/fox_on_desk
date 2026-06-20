@@ -30,6 +30,9 @@ pub fn t(key: &str, lang: &str) -> String {
         ("upToDateDesc", "zh") => "当前版本已经是最新的了".into(),
         ("checkFailed", "zh") => "检查更新失败".into(),
         ("restoreInteraction", "zh") => "恢复交互".into(),
+        ("skin", "zh") => "皮肤".into(),
+        ("skinClyde", "zh") => "Clyde".into(),
+        ("skinFox", "zh") => "狐狸".into(),
         // English (default)
         ("sessionWorking", _) => "Working".into(),
         ("sessionThinking", _) => "Thinking".into(),
@@ -61,6 +64,9 @@ pub fn t(key: &str, lang: &str) -> String {
         ("upToDateDesc", _) => "You are running the latest version".into(),
         ("checkFailed", _) => "Update check failed".into(),
         ("restoreInteraction", _) => "Restore Interaction".into(),
+        ("skin", _) => "Skin".into(),
+        ("skinClyde", _) => "Clyde".into(),
+        ("skinFox", _) => "Fox".into(),
         _ => key.to_string(),
     }
 }

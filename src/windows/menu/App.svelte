@@ -28,6 +28,7 @@
     auto_dnd_meetings: boolean;
     auto_start_with_claude: boolean;
     environment_controls_supported: boolean;
+    skin: string;
   }
 
   let data: MenuData | null = $state(null);
@@ -57,6 +58,7 @@
       autoStart: '随 Claude Code 启动', sessions: '会话', language: '语言', quit: '退出',
       clickThroughHint: '开启后可从托盘菜单的“恢复交互”关闭',
       noSessions: '没有活跃会话', justNow: '刚刚', macOnly: '仅 macOS',
+      skin: '皮肤', skinClyde: 'Clyde', skinFox: '狐狸',
     };
     const en: Record<string, string> = {
       size: 'Size', miniMode: 'Mini Mode', dnd: 'Sleep (Do Not Disturb)',
@@ -66,6 +68,7 @@
       autoStart: 'Start with Claude Code', sessions: 'Sessions', language: 'Language', quit: 'Quit',
       clickThroughHint: 'Turn it off from the tray menu with Restore Interaction',
       noSessions: 'No active sessions', justNow: 'just now', macOnly: 'macOS only',
+      skin: 'Skin', skinClyde: 'Clyde', skinFox: 'Fox',
     };
     return (data.lang === 'zh' ? zh[key] : en[key]) ?? key;
   }
@@ -299,6 +302,18 @@
       <div class="submenu">
         <button class="item" class:checked={data.lang === 'en'} onclick={() => action('lang-en')}>English</button>
         <button class="item" class:checked={data.lang === 'zh'} onclick={() => action('lang-zh')}>中文</button>
+      </div>
+    {/if}
+  </div>
+
+  <!-- Skin -->
+  <div class="item has-sub" role="button" tabindex="-1" onmouseenter={() => activeSubmenu = 'skin'} onmouseleave={() => activeSubmenu = null}>
+    <span>{t('skin')}</span>
+    <span class="arrow">›</span>
+    {#if activeSubmenu === 'skin'}
+      <div class="submenu">
+        <button class="item" class:checked={data.skin === 'clyde'} onclick={() => action('skin-clyde')}>{t('skinClyde')}</button>
+        <button class="item" class:checked={data.skin === 'fox'} onclick={() => action('skin-fox')}>{t('skinFox')}</button>
       </div>
     {/if}
   </div>

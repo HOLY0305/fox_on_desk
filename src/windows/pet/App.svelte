@@ -2,12 +2,18 @@
   import { onMount, onDestroy } from 'svelte';
   import { listen, type UnlistenFn } from '@tauri-apps/api/event';
   import { invoke } from '@tauri-apps/api/core';
-  import { currentSvg, currentState, dndEnabled, currentLang } from '../../lib/stores';
+  import { currentSvg, currentState, currentSkin, dndEnabled, currentLang } from '../../lib/stores';
   import { get } from 'svelte/store';
 
-  import _idleFollowRaw from '../../../assets/svg/clyde-idle-follow.svg?raw';
+  import _idleFollowRaw from '../../../assets/skins/clyde/clyde-idle-follow.svg?raw';
 
-  const rawModules = import.meta.glob('../../../assets/svg/*.svg', {
+  const clydeModules = import.meta.glob('../../../assets/skins/clyde/*.svg', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }) as Record<string, string>;
+
+  const foxModules = import.meta.glob('../../../assets/skins/fox/*.svg', {
     query: '?raw',
     import: 'default',
     eager: true,
@@ -17,18 +23,30 @@
     return raw.replace(/\s+width="[^"]*"/, '').replace(/\s+height="[^"]*"/, '');
   }
 
-  // Pre-process all SVGs at init time — avoids regex on every state change
-  const svgCache: Record<string, string> = {};
-  for (const [key, raw] of Object.entries(rawModules)) {
-    const filename = key.split('/').pop() ?? key;
-    svgCache[filename] = stripSvgSize(raw);
-  }
-  if (_idleFollowRaw && !svgCache['clyde-idle-follow.svg']) {
-    svgCache['clyde-idle-follow.svg'] = stripSvgSize(_idleFollowRaw);
+  // Build per-skin cache: skinName -> filename -> svgString
+  function buildSkinCache(modules: Record<string, string>): Record<string, string> {
+    const cache: Record<string, string> = {};
+    for (const [key, raw] of Object.entries(modules)) {
+      const filename = key.split('/').pop() ?? key;
+      cache[filename] = stripSvgSize(raw);
+    }
+    return cache;
   }
 
+  const skinCache: Record<string, Record<string, string>> = {
+    clyde: buildSkinCache(clydeModules),
+    fox: buildSkinCache(foxModules),
+  };
+
+  if (_idleFollowRaw && !skinCache['clyde']['clyde-idle-follow.svg']) {
+    skinCache['clyde']['clyde-idle-follow.svg'] = stripSvgSize(_idleFollowRaw);
+  }
+
+  let activeSkin = $state(get(currentSkin));
+
   function getSvg(filename: string): string {
-    return svgCache[filename] ?? svgCache['clyde-idle-follow.svg'] ?? '';
+    const cache = skinCache[activeSkin] ?? skinCache['fox'];
+    return cache[filename] ?? cache['clyde-idle-follow.svg'] ?? '';
   }
 
   let svgContent = $state(getSvg(get(currentSvg)));
@@ -75,8 +93,12 @@
 
   onMount(() => {
     const setup = async () => {
-      const config = await invoke<{ opacity: number }>('get_pet_config');
+      const config = await invoke<{ opacity: number; skin: string }>('get_pet_config');
       opacity = config.opacity ?? 1;
+      if (config.skin) {
+        activeSkin = config.skin;
+        currentSkin.set(config.skin);
+      }
 
       unlisten.push(await listen<{ state: string; svg: string; flip?: boolean }>('state-change', ({ payload }) => {
         if (isReacting) return;
@@ -92,6 +114,12 @@
 
       unlisten.push(await listen<{ enabled: boolean }>('dnd-change', ({ payload }) => {
         dndEnabled.set(payload.enabled);
+      }));
+
+      unlisten.push(await listen<{ skin: string }>('skin-changed', ({ payload }) => {
+        activeSkin = payload.skin;
+        currentSkin.set(payload.skin);
+        svgContent = getSvg(get(currentSvg));
       }));
 
       unlisten.push(await listen<{ svg: string; duration_ms: number }>('play-click-reaction', ({ payload }) => {

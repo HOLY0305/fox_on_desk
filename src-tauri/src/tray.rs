@@ -56,6 +56,7 @@ fn build_menu(app: &AppHandle, lang: &str) -> tauri::Result<Menu<tauri::Wry>> {
         .map(|prefs| prefs.auto_start_with_claude)
         .unwrap_or(false);
     let is_mini = prefs.as_ref().map(|prefs| prefs.mini_mode).unwrap_or(false);
+    let cur_skin = prefs.as_ref().map(|prefs| prefs.skin.as_str()).unwrap_or("fox");
     let is_dnd = app
         .try_state::<SharedState>()
         .map(|state| state.lock_or_recover().dnd)
@@ -167,6 +168,20 @@ fn build_menu(app: &AppHandle, lang: &str) -> tauri::Result<Menu<tauri::Wry>> {
     let lang_zh = MenuItem::with_id(app, "lang-zh", zh_label, true, None::<&str>)?;
     let lang_sub = Submenu::with_items(app, t("language", lang), true, &[&lang_en, &lang_zh])?;
 
+    let clyde_label = if cur_skin == "clyde" {
+        format!("✓ {}", t("skinClyde", lang))
+    } else {
+        t("skinClyde", lang)
+    };
+    let fox_label = if cur_skin == "fox" {
+        format!("✓ {}", t("skinFox", lang))
+    } else {
+        t("skinFox", lang)
+    };
+    let skin_clyde = MenuItem::with_id(app, "skin-clyde", clyde_label, true, None::<&str>)?;
+    let skin_fox = MenuItem::with_id(app, "skin-fox", fox_label, true, None::<&str>)?;
+    let skin_sub = Submenu::with_items(app, t("skin", lang), true, &[&skin_clyde, &skin_fox])?;
+
     let mini_label = if is_mini {
         format!("✓ {}", t("mini", lang))
     } else {
@@ -236,6 +251,7 @@ fn build_menu(app: &AppHandle, lang: &str) -> tauri::Result<Menu<tauri::Wry>> {
             &opacity_sub,
             &permission_wait_sub,
             &lang_sub,
+            &skin_sub,
             &autostart,
             &check_updates_item,
             &quit,
@@ -417,6 +433,11 @@ fn handle_tray_event(app: &AppHandle, id: &str) {
         "lang-en" | "lang-zh" => {
             let lang = if id == "lang-zh" { "zh" } else { "en" };
             apply_lang(app, lang);
+        }
+        "skin-clyde" | "skin-fox" => {
+            let skin = if id == "skin-clyde" { "clyde" } else { "fox" };
+            crate::apply_skin(app, skin);
+            rebuild_current_menu(app);
         }
         "check-for-updates" => {
             crate::update_check::trigger_manual_check(app);

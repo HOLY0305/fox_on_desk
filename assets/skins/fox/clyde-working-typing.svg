@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    <style>
+      /* High-speed body jitter */
+      .body-jitter {
+        transform-origin: 7.5px 15px;
+        animation: jitter 0.08s infinite alternate ease-in-out;
+      }
+      /* Furious typing arms */
+      .arm-l-type {
+        transform-origin: 2px 10px;
+        animation: type-l 0.15s infinite ease-in-out;
+      }
+      .arm-r-type {
+        transform-origin: 13px 10px;
+        animation: type-r 0.12s infinite ease-in-out;
+      }
+      /* Eye tracking */
+      .eyes-read {
+        animation: read-code 1.2s infinite;
+      }
+      /* Floating data packets */
+      .data-bit {
+        opacity: 0;
+        animation: float-data 1s infinite linear;
+      }
+      .d1 { animation-delay: 0.0s; transform-origin: -2px 10px; }
+      .d2 { animation-delay: 0.3s; transform-origin: 5px 12px; }
+      .d3 { animation-delay: 0.6s; transform-origin: 12px 11px; }
+      .d4 { animation-delay: 0.8s; transform-origin: 17px 9px; }
+      .d5 { animation-delay: 0.1s; transform-origin: 8px 10px; }
+      .d6 { animation-delay: 0.4s; transform-origin: 0px 11px; }
+      .d7 { animation-delay: 0.7s; transform-origin: 15px 12px; }
+      /* Laptop Logo Glow */
+      .logo-glow {
+        animation: logo-pulse 1.5s infinite alternate ease-in-out;
+      }
+      .eyes-blink {
+        transform-origin: 7.5px 9px;
+        animation: eye-blink 4s infinite ease-in-out;
+      }
+      .breathe-anim {
+        transform-origin: 7.5px 13px;
+        animation: breathe 3.2s infinite ease-in-out;
+      }
+      #eyes-js, #body-js, #shadow-js {
+        transition: transform 0.2s ease-out;
+      }
+      #shadow-js {
+        transform-origin: 7.5px 15px;
+      }
+      @keyframes breathe {
+        0%, 100% { transform: scale(1, 1) translate(0, 0); }
+        50% { transform: scale(1.02, 0.98) translate(0, 0.5px); }
+      }
+      @keyframes eye-blink {
+        0%, 10%, 100% { transform: scaleY(1); }
+        5% { transform: scaleY(0.1); }
+      }
+      @keyframes jitter {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(0.5px); }
+      }
+      @keyframes type-l {
+        0% { transform: rotate(70deg); }
+        25% { transform: rotate(110deg); }
+        50% { transform: rotate(80deg); }
+        75% { transform: rotate(100deg); }
+        100% { transform: rotate(70deg); }
+      }
+      @keyframes type-r {
+        0% { transform: rotate(-80deg); }
+        25% { transform: rotate(-100deg); }
+        50% { transform: rotate(-70deg); }
+        75% { transform: rotate(-110deg); }
+        100% { transform: rotate(-80deg); }
+      }
+      @keyframes read-code {
+        0%, 14% { transform: translate(-2px, 0); }
+        15%, 29% { transform: translate(-1px, 0); }
+        30%, 44% { transform: translate(0px, 0); }
+        45%, 59% { transform: translate(1px, 0); }
+        60%, 84% { transform: translate(2px, 0); }
+        85%, 100% { transform: translate(-2px, 0); }
+      }
+      @keyframes float-data {
+        0% { transform: translateY(0) scale(0.5); opacity: 0; }
+        20% { opacity: 0.8; }
+        100% { transform: translateY(-15px) scale(1.2); opacity: 0; }
+      }
+      @keyframes logo-pulse {
+        0% { opacity: 0.4; }
+        100% { opacity: 1; }
+      }
+    </style>
+
+    <g id="pixel-packet">
+      <rect x="0" y="0" width="1.5" height="1.5" />
+    </g>
+  </defs>
+
+  <!-- Ground Shadow -->
+  <g id="shadow-js">
+    <rect x="3" y="15" width="9" height="1" fill="#000000" opacity="0.5"/>
+  </g>
+
+  <!-- Data Particles floating up from behind the laptop -->
+  <g class="data-particles" fill="#40C4FF">
+    <use href="#pixel-packet" class="data-bit d1" x="-2" y="12" />
+    <use href="#pixel-packet" class="data-bit d2" x="5" y="11" />
+    <use href="#pixel-packet" class="data-bit d3" x="12" y="13" />
+    <use href="#pixel-packet" class="data-bit d4" x="17" y="11" />
+    <use href="#pixel-packet" class="data-bit d5" x="8" y="10" />
+    <use href="#pixel-packet" class="data-bit d6" x="1" y="11" />
+    <use href="#pixel-packet" class="data-bit d7" x="15" y="12" />
+  </g>
+
+  <!-- Animated Character Body -->
+  <g id="body-js">
+    <g class="body-jitter">
+      <g class="breathe-anim">
+
+        <!-- Tail -->
+        <rect x="1" y="7" width="2" height="5" fill="#C46A0A"/>
+        <rect x="-1" y="7" width="2" height="5" fill="#C46A0A"/>
+        <rect x="0" y="8" width="3" height="5" fill="#C46A0A"/>
+        <rect x="-1" y="6" width="2" height="3" fill="#FAEBD7"/>
+
+        <!-- Left Ear -->
+        <rect x="3" y="4" width="1" height="2" fill="#E8710A"/>
+        <rect x="4" y="4.5" width="1" height="2" fill="#E8710A"/>
+        <rect x="5" y="5" width="1.3" height="1" fill="#E8710A"/>
+        <polygon points="3,4 4,3 6.5,6" fill="#E8710A"/>
+        <polygon points="4,6 4,4.5 5,6" fill="#FAEBD7"/>
+
+        <!-- Right Ear -->
+        <rect x="9" y="5" width="1" height="1" fill="#E8710A"/>
+        <rect x="10" y="3" width="1" height="3" fill="#E8710A"/>
+        <rect x="11" y="4" width="1" height="2" fill="#E8710A"/>
+        <polygon points="11,3 11,4 12,4" fill="#E8710A"/>
+        <polygon points="8,6 10,6 10,3" fill="#E8710A"/>
+        <polygon points="11,4 12,4 11,5" fill="#E8710A"/>
+        <polygon points="10,6 11,6 10.5,4" fill="#FAEBD7"/>
+
+        <!-- Body (fox) -->
+        <rect x="3" y="6" width="9" height="7" fill="#E8710A"/>
+
+        <!-- Typing Arms -->
+        <g class="arm-l-type">
+          <rect x="1" y="9" width="2" height="2" fill="#E8710A"/>
+        </g>
+        <g class="arm-r-type">
+          <rect x="12" y="9" width="2" height="2" fill="#E8710A"/>
+        </g>
+
+        <!-- Legs -->
+        <rect x="4" y="13" width="2" height="2" fill="#E8710A"/>
+        <rect x="9" y="13" width="2" height="2" fill="#E8710A"/>
+
+        <!-- Eyes (Squinting) -->
+        <g id="eyes-js" fill="#000000">
+          <g class="eyes-read">
+            <rect x="5" y="8.5" width="1" height="1"/>
+            <rect x="10" y="8.5" width="1" height="1"/>
+          </g>
+        </g>
+
+      </g>
+    </g>
+  </g>
+
+  <!-- Pixel Laptop -->
+  <g id="laptop" transform="translate(3, 9.5)">
+    <rect x="-0.5" y="5" width="10" height="1" fill="#546E7A" rx="0.5"/>
+    <rect x="0" y="0" width="9" height="5.5" fill="#78909C" rx="0.5"/>
+    <circle cx="4.5" cy="2.5" r="1.5" fill="#40C4FF" opacity="0.2" class="logo-glow"/>
+    <rect x="4" y="2" width="1" height="1" fill="#FFFFFF" class="logo-glow"/>
+  </g>
+
+</svg>

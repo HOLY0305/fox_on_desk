@@ -64,6 +64,8 @@ pub struct Prefs {
     pub last_update_check_epoch: u64,
     #[serde(default)]
     pub dismissed_update_version: String,
+    #[serde(default = "default_skin")]
+    pub skin: String,
 }
 
 /// Default screen size fallback when monitor info is unavailable.
@@ -103,6 +105,9 @@ fn default_opacity() -> f32 {
 fn default_permission_decision_window_secs() -> u16 {
     DEFAULT_PERMISSION_DECISION_WINDOW_SECS
 }
+fn default_skin() -> String {
+    "fox".into()
+}
 
 pub fn normalize_opacity(opacity: f32) -> f32 {
     opacity.clamp(0.4, 1.0)
@@ -137,6 +142,7 @@ impl Default for Prefs {
             check_for_updates: true,
             last_update_check_epoch: 0,
             dismissed_update_version: String::new(),
+            skin: default_skin(),
         }
     }
 }
@@ -196,6 +202,7 @@ mod tests {
         assert_eq!(p.size, "S");
         assert_eq!(p.lang, "en");
         assert!(p.show_tray);
+        assert_eq!(p.skin, "fox");
         assert_eq!(
             p.permission_decision_window_secs,
             DEFAULT_PERMISSION_DECISION_WINDOW_SECS

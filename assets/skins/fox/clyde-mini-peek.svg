@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    <style>
+      .breathe-anim {
+        transform-origin: 7.5px 13px;
+        animation: breathe 3.2s infinite ease-in-out;
+      }
+
+      .eyes-blink {
+        transform-origin: 7.5px 9px;
+        animation: eye-blink 4s infinite ease-in-out;
+      }
+
+      .arm-wave {
+        transform-origin: 2px 9px;
+        animation: peek-wave 3s infinite ease-in-out;
+      }
+
+      #eyes-js, #body-js, #shadow-js {
+        transition: transform 0.2s ease-out;
+      }
+      #shadow-js {
+        transform-origin: 7.5px 15px;
+      }
+
+      @keyframes breathe {
+        0%, 100% { transform: scale(1, 1) translate(0, 0); }
+        50% { transform: scale(1.02, 0.98) translate(0, 0.5px); }
+      }
+
+      @keyframes eye-blink {
+        0%, 10%, 100% { transform: scaleY(1); }
+        5% { transform: scaleY(0.1); }
+      }
+
+      @keyframes peek-wave {
+        0% { transform: rotate(0deg); }
+        5% { transform: rotate(35deg); }
+        10% { transform: rotate(-15deg); }
+        15% { transform: rotate(35deg); }
+        20% { transform: rotate(-15deg); }
+        25% { transform: rotate(35deg); }
+        30%, 100% { transform: rotate(0deg); }
+      }
+    </style>
+  </defs>
+
+  <g id="shadow-js">
+    <rect x="3" y="16" width="9" height="1" fill="#000000" opacity="0.5"/>
+  </g>
+
+  <g transform="rotate(-12, 7.5, 15)">
+    <g id="body-js">
+      <g class="breathe-anim">
+
+        <!-- Tail -->
+        <rect x="1" y="7" width="2" height="5" fill="#C46A0A"/>
+        <rect x="-1" y="7" width="2" height="5" fill="#C46A0A"/>
+        <rect x="0" y="8" width="3" height="5" fill="#C46A0A"/>
+        <rect x="-1" y="6" width="2" height="3" fill="#FAEBD7"/>
+
+        <!-- Left Ear -->
+        <rect x="3" y="4" width="1" height="2" fill="#E8710A"/>
+        <rect x="4" y="4.5" width="1" height="2" fill="#E8710A"/>
+        <rect x="5" y="5" width="1.3" height="1" fill="#E8710A"/>
+        <polygon points="3,4 4,3 6.5,6" fill="#E8710A"/>
+        <polygon points="4,6 4,4.5 5,6" fill="#FAEBD7"/>
+
+        <!-- Right Ear -->
+        <rect x="9" y="5" width="1" height="1" fill="#E8710A"/>
+        <rect x="10" y="3" width="1" height="3" fill="#E8710A"/>
+        <rect x="11" y="4" width="1" height="2" fill="#E8710A"/>
+        <polygon points="11,3 11,4 12,4" fill="#E8710A"/>
+        <polygon points="8,6 10,6 10,3" fill="#E8710A"/>
+        <polygon points="11,4 12,4 11,5" fill="#E8710A"/>
+        <polygon points="10,6 11,6 10.5,4" fill="#FAEBD7"/>
+
+        <!-- Torso -->
+        <rect x="3" y="6" width="9" height="7" fill="#E8710A"/>
+
+        <!-- Left Arm (wave) -->
+        <g class="arm-wave">
+          <rect x="0" y="9" width="3" height="2" fill="#E8710A"/>
+        </g>
+
+        <!-- Right Arm -->
+        <rect x="12" y="9" width="2" height="2" fill="#E8710A"/>
+
+        <!-- Legs -->
+        <rect x="4" y="13" width="2" height="2" fill="#E8710A"/>
+        <rect x="9" y="13" width="2" height="2" fill="#E8710A"/>
+
+        <!-- Eyes -->
+        <g id="eyes-js" fill="#000000">
+          <g class="eyes-blink">
+            <rect x="5" y="8" width="1" height="2"/>
+            <rect x="10" y="8" width="1" height="2"/>
+          </g>
+        </g>
+
+      </g>
+    </g>
+  </g>
+</svg>

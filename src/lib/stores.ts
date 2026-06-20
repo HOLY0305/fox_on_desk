@@ -11,5 +11,6 @@ export type PetState =
 
 export const currentState = writable<PetState>('idle');
 export const currentSvg   = writable<string>('clyde-idle-follow.svg');
+export const currentSkin  = writable<string>('fox');
 export const dndEnabled   = writable<boolean>(false);
 export const currentLang  = writable<string>('en');

@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500"
+  shape-rendering="crispEdges">
+  <defs>
+    <style>
+      .breathe-anim {
+        transform-origin: 7.5px 13px;
+        animation: breathe 5s infinite ease-in-out;
+      }
+
+      .arm-wobble {
+        transform-box: fill-box;
+        transform-origin: 100% 0%;
+        animation: arm-drift 50s infinite ease-in-out;
+      }
+
+      .z-particle { opacity: 0; }
+      .z1 { animation: float-1 6s infinite ease-in-out 0s; }
+      .z2 { animation: float-2 6s infinite ease-in-out 2s; }
+      .z3 { animation: float-3 6s infinite ease-in-out 4s; }
+
+      #eyes-js, #body-js, #shadow-js {
+        transition: transform 0.2s ease-out;
+      }
+      #shadow-js {
+        transform-origin: 7.5px 15px;
+      }
+
+      @keyframes breathe {
+        0%, 100% { transform: scale(1, 1) translate(0, 0); }
+        50% { transform: scale(1.015, 0.985) translate(0, 0.3px); }
+      }
+
+      @keyframes arm-drift {
+        0%, 94%, 100% { transform: rotate(0deg); }
+        96% { transform: rotate(3deg); }
+        98% { transform: rotate(-1deg); }
+      }
+
+      @keyframes float-1 {
+        0%   { transform: translate(-2px, 6px) scale(0.4); opacity: 0; }
+        10%  { opacity: 1; }
+        30%  { transform: translate(-5px, 3px) scale(0.6); }
+        50%  { transform: translate(-3px, 0px) scale(0.8); }
+        70%  { transform: translate(-6px, -3px) scale(1.0); }
+        90%  { opacity: 0.8; }
+        100% { transform: translate(-4px, -6px) scale(1.1); opacity: 0; }
+      }
+
+      @keyframes float-2 {
+        0%   { transform: translate(-3px, 7px) scale(0.3); opacity: 0; }
+        10%  { opacity: 1; }
+        30%  { transform: translate(-6px, 4px) scale(0.5); }
+        50%  { transform: translate(-4px, 1px) scale(0.7); }
+        70%  { transform: translate(-7px, -2px) scale(0.9); }
+        90%  { opacity: 0.8; }
+        100% { transform: translate(-5px, -5px) scale(1.0); opacity: 0; }
+      }
+
+      @keyframes float-3 {
+        0%   { transform: translate(-1px, 5px) scale(0.5); opacity: 0; }
+        10%  { opacity: 1; }
+        30%  { transform: translate(-4px, 2px) scale(0.7); }
+        50%  { transform: translate(-2px, -1px) scale(0.9); }
+        70%  { transform: translate(-5px, -4px) scale(1.1); }
+        90%  { opacity: 0.8; }
+        100% { transform: translate(-3px, -7px) scale(1.2); opacity: 0; }
+      }
+    </style>
+
+    <g id="pixel-z">
+      <rect x="0" y="0" width="4" height="1"/>
+      <rect x="2" y="1" width="1" height="1"/>
+      <rect x="1" y="2" width="1" height="1"/>
+      <rect x="0" y="3" width="4" height="1"/>
+    </g>
+
+    <g id="pixel-z-small">
+      <rect x="0" y="0" width="3" height="1"/>
+      <rect x="1" y="1" width="1" height="1"/>
+      <rect x="0" y="2" width="3" height="1"/>
+    </g>
+  </defs>
+
+  <!-- Zzz particles -->
+  <use href="#pixel-z" class="z-particle z1" fill="#90A4AE"/>
+  <use href="#pixel-z-small" class="z-particle z2" fill="#B0BEC5"/>
+  <use href="#pixel-z" class="z-particle z3" fill="#CFD8DC"/>
+
+  <g id="shadow-js">
+    <rect x="3" y="16" width="9" height="1" fill="#000000" opacity="0.5"/>
+  </g>
+
+  <g transform="rotate(-12, 7.5, 15)">
+    <g id="body-js">
+      <g class="breathe-anim">
+
+        <!-- Tail -->
+        <rect x="1" y="7" width="2" height="5" fill="#C46A0A"/>
+        <rect x="-1" y="7" width="2" height="5" fill="#C46A0A"/>
+        <rect x="0" y="8" width="3" height="5" fill="#C46A0A"/>
+        <rect x="-1" y="6" width="2" height="3" fill="#FAEBD7"/>
+
+        <!-- Left Ear -->
+        <rect x="3" y="4" width="1" height="2" fill="#E8710A"/>
+        <rect x="4" y="4.5" width="1" height="2" fill="#E8710A"/>
+        <rect x="5" y="5" width="1.3" height="1" fill="#E8710A"/>
+        <polygon points="3,4 4,3 6.5,6" fill="#E8710A"/>
+        <polygon points="4,6 4,4.5 5,6" fill="#FAEBD7"/>
+
+        <!-- Right Ear -->
+        <rect x="9" y="5" width="1" height="1" fill="#E8710A"/>
+        <rect x="10" y="3" width="1" height="3" fill="#E8710A"/>
+        <rect x="11" y="4" width="1" height="2" fill="#E8710A"/>
+        <polygon points="11,3 11,4 12,4" fill="#E8710A"/>
+        <polygon points="8,6 10,6 10,3" fill="#E8710A"/>
+        <polygon points="11,4 12,4 11,5" fill="#E8710A"/>
+        <polygon points="10,6 11,6 10.5,4" fill="#FAEBD7"/>
+
+        <!-- Torso -->
+        <rect x="3" y="6" width="9" height="7" fill="#E8710A"/>
+
+        <!-- Left Arm (sleep drift) -->
+        <g class="arm-wobble">
+          <rect x="1" y="9" width="2" height="2" fill="#E8710A"/>
+        </g>
+
+        <!-- Right Arm -->
+        <rect x="12" y="9" width="2" height="2" fill="#E8710A"/>
+
+        <!-- Legs -->
+        <rect x="4" y="13" width="2" height="2" fill="#E8710A"/>
+        <rect x="9" y="13" width="2" height="2" fill="#E8710A"/>
+
+        <!-- Eyes closed (sleeping) -->
+        <g id="eyes-js" fill="#000000">
+          <rect x="4.5" y="8.8" width="2" height="0.4"/>
+          <rect x="9.5" y="8.8" width="2" height="0.4"/>
+        </g>
+
+      </g>
+    </g>
+  </g>
+</svg>

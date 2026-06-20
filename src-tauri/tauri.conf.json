@@ -51,7 +51,8 @@
       "icons/icon.ico"
     ],
     "resources": {
-      "../assets/svg": "svg",
+      "../assets/skins/clyde": "skins/clyde",
+      "../assets/skins/fox": "skins/fox",
       "../hooks": "hooks",
       "../src-tauri/sound": "sound"
     },
