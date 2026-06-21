@@ -85,6 +85,7 @@ pub fn show_bubble(app: &AppHandle, bubbles: &BubbleMap, data: BubbleData) -> bo
         .position(x_log, y_log)
         .decorations(false)
         .always_on_top(true)
+        .focused(false) // Don't steal focus from user's active window
         .skip_taskbar(true)
         .resizable(false)
         .visible(true);
