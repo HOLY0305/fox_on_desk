@@ -133,7 +133,7 @@ fn build_menu(app: &AppHandle, lang: &str) -> tauri::Result<Menu<tauri::Wry>> {
     let opacity_sub = Submenu::with_items(app, t("opacity", lang), true, &opacity_refs)?;
 
     let mut permission_wait_items = Vec::new();
-    for secs in [12_u16, 20, 30, 45, 60] {
+    for secs in [12_u16, 20, 30, 45, 60, 120, 180, 300] {
         let label = if permission_decision_window_secs == secs {
             format!("✓ {secs}s")
         } else {
@@ -422,7 +422,10 @@ fn handle_tray_event(app: &AppHandle, id: &str) {
         | "permission-timeout-20"
         | "permission-timeout-30"
         | "permission-timeout-45"
-        | "permission-timeout-60" => {
+        | "permission-timeout-60"
+        | "permission-timeout-120"
+        | "permission-timeout-180"
+        | "permission-timeout-300" => {
             let secs = id
                 .strip_prefix("permission-timeout-")
                 .and_then(|value| value.parse::<u16>().ok())

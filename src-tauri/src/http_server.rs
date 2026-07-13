@@ -7,6 +7,7 @@ use crate::util::MutexExt;
 use axum::{
     extract::State as AxumState,
     http::{HeaderMap, StatusCode},
+    response::IntoResponse,
     routing::{get, post},
     Json, Router,
 };
@@ -22,7 +23,6 @@ pub const CLYDE_SERVER_HEADER: &str = "x-clyde-server";
 pub const CLYDE_SERVER_ID: &str = "clyde-on-desk";
 pub const DEFAULT_PORT: u16 = 23333;
 const REQUEST_WATCHDOG_POLL_INTERVAL: std::time::Duration = std::time::Duration::from_secs(2);
-const REQUEST_DEFAULT_TIMEOUT: std::time::Duration = std::time::Duration::from_secs(300);
 const REQUEST_DEFAULT_DECISION_WINDOW: std::time::Duration =
     std::time::Duration::from_secs(crate::prefs::DEFAULT_PERMISSION_DECISION_WINDOW_SECS as u64);
 
@@ -309,7 +309,7 @@ fn default_decision_for(bubble_data: &permission::BubbleData) -> HookDecision {
     if bubble_data.is_elicitation {
         HookDecision::Elicitation(ElicitationDecision::Cancel)
     } else {
-        HookDecision::Permission(PermDecision::Deny)
+        HookDecision::Permission(PermDecision::Allow)
     }
 }
 
@@ -323,12 +323,10 @@ fn request_is_elicitation(approval_queue: &ApprovalQueue, id: &str) -> bool {
 }
 
 fn should_auto_resolve_request(
-    session_advanced: bool,
     now: tokio::time::Instant,
-    session_advance_grace_deadline: tokio::time::Instant,
     request_deadline: tokio::time::Instant,
 ) -> bool {
-    now >= request_deadline || (session_advanced && now >= session_advance_grace_deadline)
+    now >= request_deadline
 }
 
 fn request_decision_window(app: &AppHandle) -> Duration {
@@ -454,7 +452,6 @@ async fn queue_request_and_wait(
 ) -> HookDecision {
     let entry_id = bubble_data.id.clone();
     let default_decision = default_decision_for(&bubble_data);
-    let bubble_session_id = bubble_data.session_id.clone();
     let (tx, rx) = oneshot::channel::<HookDecision>();
     ctx.pending_perms
         .lock_or_recover()
@@ -467,16 +464,10 @@ async fn queue_request_and_wait(
     let watchdog_ctx = ctx.clone();
     let watchdog_id = entry_id.clone();
     let watchdog_default = default_decision.clone();
-    let opened_at = std::time::Instant::now();
-    let session_advance_grace_deadline =
+    let request_deadline =
         tokio::time::Instant::now() + request_decision_window(&ctx.app);
-    let session_existed_at_open = {
-        let sm = ctx.state.lock_or_recover();
-        sm.sessions.contains_key(&bubble_session_id)
-    };
     let watchdog = tauri::async_runtime::spawn(async move {
         let mut interval = tokio::time::interval(REQUEST_WATCHDOG_POLL_INTERVAL);
-        let request_deadline = tokio::time::Instant::now() + REQUEST_DEFAULT_TIMEOUT;
         loop {
             interval.tick().await;
             let still_pending = watchdog_ctx
@@ -486,17 +477,8 @@ async fn queue_request_and_wait(
             if !still_pending {
                 return;
             }
-            let session_advanced = {
-                let sm = watchdog_ctx.state.lock_or_recover();
-                match sm.sessions.get(&bubble_session_id) {
-                    Some(entry) => entry.updated_at > opened_at,
-                    None => session_existed_at_open,
-                }
-            };
             if should_auto_resolve_request(
-                session_advanced,
                 tokio::time::Instant::now(),
-                session_advance_grace_deadline,
                 request_deadline,
             ) {
                 break;
@@ -537,7 +519,7 @@ async fn queue_request_and_wait(
 async fn post_permission(
     AxumState(ctx): AxumState<ServerCtx>,
     Json(payload): Json<Value>,
-) -> (StatusCode, HeaderMap, Json<Value>) {
+) -> impl IntoResponse {
     let mut headers = HeaderMap::new();
     headers.insert(CLYDE_SERVER_HEADER, CLYDE_SERVER_ID.parse().unwrap());
 
@@ -639,12 +621,17 @@ async fn post_permission(
         ask_questions: ask_original_questions,
     };
     crate::sfx::play(&ctx.sfx, &ctx.sfx_bank, "permission_request");
+    if is_ask_user {
+        // Return 200 without JSON — Claude Code treats non-JSON as hook failure
+        // and falls back to the built-in terminal prompt for user input.
+        return (StatusCode::OK, headers, String::new()).into_response();
+    }
     let response = match queue_request_and_wait(&ctx, bubble_data).await {
         HookDecision::Permission(decision) => perm_response(&decision),
         HookDecision::Elicitation(_) => perm_response(&PermDecision::Deny),
     };
 
-    (StatusCode::OK, headers, Json(response))
+    (StatusCode::OK, headers, Json(response)).into_response()
 }
 
 async fn post_elicitation(

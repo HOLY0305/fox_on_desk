@@ -1802,6 +1802,18 @@ fn handle_context_menu_event(app: &AppHandle, state: &SharedState, id: &str) {
             set_permission_decision_window_secs(app, 60);
             refresh_tray = true;
         }
+        "permission-timeout-120" => {
+            set_permission_decision_window_secs(app, 120);
+            refresh_tray = true;
+        }
+        "permission-timeout-180" => {
+            set_permission_decision_window_secs(app, 180);
+            refresh_tray = true;
+        }
+        "permission-timeout-300" => {
+            set_permission_decision_window_secs(app, 300);
+            refresh_tray = true;
+        }
         "lang-en" => tray::apply_lang_pub(app, "en"),
         "lang-zh" => tray::apply_lang_pub(app, "zh"),
         "hide" => do_hide_to_tray(app),

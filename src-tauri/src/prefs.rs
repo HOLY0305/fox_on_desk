@@ -6,7 +6,7 @@ use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Manager};
 
 pub type SharedPrefs = Arc<Mutex<Prefs>>;
-pub const DEFAULT_PERMISSION_DECISION_WINDOW_SECS: u16 = 12;
+pub const DEFAULT_PERMISSION_DECISION_WINDOW_SECS: u16 = 60;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct MonitorPlacement {
@@ -114,7 +114,7 @@ pub fn normalize_opacity(opacity: f32) -> f32 {
 }
 
 pub fn normalize_permission_decision_window_secs(secs: u16) -> u16 {
-    secs.clamp(8, 120)
+    secs.clamp(8, 300)
 }
 
 impl Default for Prefs {
@@ -224,7 +224,7 @@ mod tests {
     fn test_permission_decision_window_normalization() {
         assert_eq!(normalize_permission_decision_window_secs(3), 8);
         assert_eq!(normalize_permission_decision_window_secs(12), 12);
-        assert_eq!(normalize_permission_decision_window_secs(240), 120);
+        assert_eq!(normalize_permission_decision_window_secs(400), 300);
     }
 
     #[test]
